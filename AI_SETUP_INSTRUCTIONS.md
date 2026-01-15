@@ -20,7 +20,7 @@ Your chatbot is configured but needs **FREE API keys** for TRUE AI intelligence.
 
 ```bash
 # In pilot-portal-backend directory
-echo "GROQ_API_KEY=gsk_your_key_here" >> .env
+echo "GROQ_API_KEY=your_groq_api_key_here" >> .env
 ```
 
 4. **Restart backend:**
