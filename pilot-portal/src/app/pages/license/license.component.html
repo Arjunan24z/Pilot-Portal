@@ -103,14 +103,200 @@
             {{ status }}
           </span>
         </div>
+
+        <!-- Restrictions -->
+        <div *ngIf="license.restrictions" class="text-slate-600 dark:text-slate-400">Restrictions</div>
+        <div *ngIf="license.restrictions" class="text-red-600 dark:text-red-400 font-medium">
+          ⚠️ {{ license.restrictions }}
+        </div>
       </div>
-  
-      <button
-        (click)="openForm()"
-        class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-medium text-white"
-      >
-        Renew / Update License
-      </button>
+
+      <!-- Ratings Section -->
+      <div *ngIf="license.ratings && license.ratings.length > 0" class="space-y-2">
+        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Ratings</h4>
+        <div class="flex flex-wrap gap-2">
+          <span
+            *ngFor="let rating of license.ratings"
+            class="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium"
+          >
+            ✓ {{ rating }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Endorsements Section -->
+      <div *ngIf="license.endorsements && license.endorsements.length > 0" class="space-y-2">
+        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Endorsements</h4>
+        <div class="space-y-2">
+          <div
+            *ngFor="let endorsement of license.endorsements"
+            class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg p-3"
+          >
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="font-medium text-slate-900 dark:text-slate-100 text-sm">
+                  {{ endorsement.endorsementType }}
+                </div>
+                <div class="text-xs text-slate-600 dark:text-slate-400 mt-1 space-y-0.5">
+                  <div *ngIf="endorsement.instructorName">
+                    Instructor: {{ endorsement.instructorName }}
+                    <span *ngIf="endorsement.instructorCertificate">({{ endorsement.instructorCertificate }})</span>
+                  </div>
+                  <div *ngIf="endorsement.date">Date: {{ endorsement.date | date }}</div>
+                  <div *ngIf="endorsement.aircraftType">Aircraft: {{ endorsement.aircraftType }}</div>
+                  <div *ngIf="endorsement.remarks" class="italic">{{ endorsement.remarks }}</div>
+                </div>
+              </div>
+              <button
+                (click)="removeEndorsement(endorsement._id!)"
+                class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs ml-2"
+                title="Remove endorsement"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap gap-2 pt-2">
+        <button
+          (click)="openForm()"
+          class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-medium text-white"
+        >
+          Renew / Update License
+        </button>
+        <button
+          (click)="openEndorsementForm()"
+          class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm font-medium text-white"
+        >
+          + Add Endorsement
+        </button>
+        <button
+          (click)="openRatingForm()"
+          class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded text-sm font-medium text-white"
+        >
+          + Add Rating
+        </button>
+      </div>
+    </div>
+
+    <!-- Endorsement Form -->
+    <div
+      *ngIf="showEndorsementForm"
+      class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg p-5 space-y-4"
+    >
+      <h4 class="font-semibold text-slate-900 dark:text-slate-100">Add New Endorsement</h4>
+
+      <div>
+        <label class="text-sm text-slate-700 dark:text-slate-300">Endorsement Type *</label>
+        <select
+          [(ngModel)]="endorsementForm.endorsementType"
+          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+        >
+          <option value="">Select endorsement type</option>
+          <option *ngFor="let type of availableEndorsements" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-sm text-slate-700 dark:text-slate-300">Instructor Name</label>
+        <input
+          type="text"
+          [(ngModel)]="endorsementForm.instructorName"
+          placeholder="e.g., John Smith, CFI"
+          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm text-slate-700 dark:text-slate-300">Instructor Certificate Number</label>
+        <input
+          type="text"
+          [(ngModel)]="endorsementForm.instructorCertificate"
+          placeholder="e.g., CFI-123456"
+          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm text-slate-700 dark:text-slate-300">Date</label>
+        <input
+          type="date"
+          [(ngModel)]="endorsementForm.date"
+          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm text-slate-700 dark:text-slate-300">Aircraft Type</label>
+        <input
+          type="text"
+          [(ngModel)]="endorsementForm.aircraftType"
+          placeholder="e.g., Cessna 182"
+          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+        />
+      </div>
+
+      <div>
+        <label class="text-sm text-slate-700 dark:text-slate-300">Remarks</label>
+        <textarea
+          [(ngModel)]="endorsementForm.remarks"
+          rows="2"
+          placeholder="Additional notes..."
+          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+        ></textarea>
+      </div>
+
+      <div class="flex gap-3">
+        <button
+          (click)="saveEndorsement()"
+          class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm font-medium text-white"
+        >
+          Save Endorsement
+        </button>
+        <button
+          (click)="showEndorsementForm = false"
+          class="border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 px-4 py-2 rounded text-sm text-slate-700 dark:text-slate-300"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Rating Form -->
+    <div
+      *ngIf="showRatingForm"
+      class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg p-5 space-y-4"
+    >
+      <h4 class="font-semibold text-slate-900 dark:text-slate-100">Add New Rating</h4>
+
+      <div>
+        <label class="text-sm text-slate-700 dark:text-slate-300">Select Rating *</label>
+        <select
+          [(ngModel)]="newRating"
+          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+        >
+          <option value="">Choose a rating</option>
+          <option *ngFor="let rating of availableRatings" [value]="rating">{{ rating }}</option>
+        </select>
+      </div>
+
+      <div class="flex gap-3">
+        <button
+          (click)="saveRating()"
+          class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded text-sm font-medium text-white"
+        >
+          Save Rating
+        </button>
+        <button
+          (click)="showRatingForm = false"
+          class="border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 px-4 py-2 rounded text-sm text-slate-700 dark:text-slate-300"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   
     <!-- FORM -->

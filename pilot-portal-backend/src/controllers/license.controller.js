@@ -72,3 +72,81 @@ exports.deleteLicense = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// Add endorsement to license
+exports.addEndorsement = async (req, res) => {
+  try {
+    const license = await License.findOne({
+      _id: req.params.id,
+      userId: req.user.userId
+    });
+
+    if (!license) {
+      return res.status(404).json({ message: "License not found" });
+    }
+
+    const endorsement = {
+      endorsementType: req.body.endorsementType,
+      instructorName: req.body.instructorName,
+      instructorCertificate: req.body.instructorCertificate,
+      date: req.body.date || new Date(),
+      aircraftType: req.body.aircraftType,
+      remarks: req.body.remarks
+    };
+
+    license.endorsements.push(endorsement);
+    license.updatedAt = Date.now();
+    await license.save();
+
+    res.json(license);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Add rating to license
+exports.addRating = async (req, res) => {
+  try {
+    const license = await License.findOne({
+      _id: req.params.id,
+      userId: req.user.userId
+    });
+
+    if (!license) {
+      return res.status(404).json({ message: "License not found" });
+    }
+
+    const rating = req.body.rating;
+    if (!license.ratings.includes(rating)) {
+      license.ratings.push(rating);
+      license.updatedAt = Date.now();
+      await license.save();
+    }
+
+    res.json(license);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Remove endorsement
+exports.removeEndorsement = async (req, res) => {
+  try {
+    const license = await License.findOne({
+      _id: req.params.id,
+      userId: req.user.userId
+    });
+
+    if (!license) {
+      return res.status(404).json({ message: "License not found" });
+    }
+
+    license.endorsements.id(req.params.endorsementId).remove();
+    license.updatedAt = Date.now();
+    await license.save();
+
+    res.json(license);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

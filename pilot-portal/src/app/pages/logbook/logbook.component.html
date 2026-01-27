@@ -85,53 +85,165 @@
   </div>
 
   <!-- ENTRY FORM -->
-  <div *ngIf="showForm" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-6 space-y-4">
+  <div *ngIf="showForm" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-6 space-y-6">
 
     <h3 class="text-xl font-semibold">
       {{ editingId ? 'Edit Flight Entry' : 'New Flight Entry' }}
     </h3>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- SECTION 1: BASIC INFO -->
+    <div class="space-y-2">
+      <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Basic Information</h4>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Date *</label>
+          <input type="date" [(ngModel)]="entry.date" required
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
 
-      <div>
-        <label class="text-sm text-slate-600 dark:text-slate-400">Date</label>
-        <input
-          type="date"
-          [(ngModel)]="entry.date"
-          class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100
-                 focus:outline-none focus:ring-2 focus:ring-sky-500"
-        />
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Aircraft Type *</label>
+          <input type="text" [(ngModel)]="entry.aircraft" placeholder="e.g., C172, PA-28" required
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Flight Type</label>
+          <select [(ngModel)]="entry.flightType"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="training">Training</option>
+            <option value="solo">Solo</option>
+            <option value="personal">Personal</option>
+            <option value="commercial">Commercial</option>
+            <option value="checkride">Checkride</option>
+          </select>
+        </div>
       </div>
+    </div>
 
-      <div>
-        <label class="text-sm text-slate-600 dark:text-slate-400">Aircraft</label>
-        <input
-          type="text"
-          [(ngModel)]="entry.aircraft"
-          class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100
-                 focus:outline-none focus:ring-2 focus:ring-sky-500"
-        />
+    <!-- SECTION 2: ROUTE -->
+    <div class="space-y-2">
+      <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Route</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Departure Airport</label>
+          <input type="text" [(ngModel)]="entry.departureAirport" placeholder="e.g., KJFK"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Arrival Airport</label>
+          <input type="text" [(ngModel)]="entry.arrivalAirport" placeholder="e.g., KLAX"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
       </div>
+    </div>
 
-      <div>
-        <label class="text-sm text-slate-600 dark:text-slate-400">Flight Hours</label>
-        <input
-          type="number"
-          step="0.1"
-          [(ngModel)]="entry.hours"
-          class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100
-                 focus:outline-none focus:ring-2 focus:ring-sky-500"
-        />
+    <!-- SECTION 3: FLIGHT TIME BREAKDOWN -->
+    <div class="space-y-2">
+      <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Flight Time Breakdown</h4>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Total Time *</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.totalTime" min="0" required
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">PIC Time</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.pilotInCommand" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">SIC Time</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.secondInCommand" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Night Time</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.nightTime" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Cross Country</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.crossCountry" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Solo Time</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.soloTime" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Dual Received</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.dualReceived" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Dual Given</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.dualGiven" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
       </div>
+    </div>
 
-      <div>
-        <label class="text-sm text-slate-600 dark:text-slate-400">Remarks</label>
-        <input
-          type="text"
-          [(ngModel)]="entry.remarks"
-          class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100
-                 focus:outline-none focus:ring-2 focus:ring-sky-500"
-        />
+    <!-- SECTION 4: INSTRUMENT TIME -->
+    <div class="space-y-2">
+      <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Instrument Time</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Actual Instrument</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.instrumentActual" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Simulated Instrument</label>
+          <input type="number" step="0.1" [(ngModel)]="entry.instrumentSimulated" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: LANDINGS -->
+    <div class="space-y-2">
+      <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Landings</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Day Landings</label>
+          <input type="number" [(ngModel)]="entry.dayLandings" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Night Landings</label>
+          <input type="number" [(ngModel)]="entry.nightLandings" min="0"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: INSTRUCTOR & REMARKS -->
+    <div class="space-y-2">
+      <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Additional Information</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Instructor Name (if applicable)</label>
+          <input type="text" [(ngModel)]="entry.instructorName" placeholder="e.g., John Smith, CFI"
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
+
+        <div>
+          <label class="text-sm text-slate-600 dark:text-slate-400">Remarks</label>
+          <input type="text" [(ngModel)]="entry.remarks" placeholder="Notes, maneuvers practiced, etc."
+            class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+        </div>
       </div>
     </div>
 
@@ -161,8 +273,12 @@
         <tr>
           <th class="p-3 text-left">Date</th>
           <th class="p-3 text-left">Aircraft</th>
-          <th class="p-3 text-left">Hours</th>
-          <th class="p-3 text-left">Remarks</th>
+          <th class="p-3 text-left">Route</th>
+          <th class="p-3 text-left">Total Time</th>
+          <th class="p-3 text-left">PIC</th>
+          <th class="p-3 text-left">Night</th>
+          <th class="p-3 text-left">XC</th>
+          <th class="p-3 text-left">Landings</th>
           <th class="p-3 text-left">Actions</th>
         </tr>
       </thead>
@@ -173,9 +289,20 @@
           class="border-t border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
         >
           <td class="p-3">{{ log.date | date:'yyyy-MM-dd' }}</td>
-          <td class="p-3">{{ log.aircraft }}</td>
-          <td class="p-3 font-medium">{{ log.hours }}</td>
-          <td class="p-3 text-slate-500 dark:text-slate-400">{{ log.remarks || '—' }}</td>
+          <td class="p-3 font-medium">{{ log.aircraft }}</td>
+          <td class="p-3 text-slate-500 dark:text-slate-400">
+            {{ log.departureAirport && log.arrivalAirport ? (log.departureAirport + ' → ' + log.arrivalAirport) : '—' }}
+          </td>
+          <td class="p-3 font-semibold">{{ log.totalTime || log.hours || 0 }}</td>
+          <td class="p-3">{{ log.pilotInCommand || '—' }}</td>
+          <td class="p-3">{{ log.nightTime || '—' }}</td>
+          <td class="p-3">{{ log.crossCountry || '—' }}</td>
+          <td class="p-3">
+            <span *ngIf="(log.dayLandings || 0) + (log.nightLandings || 0) > 0">
+              {{ log.dayLandings || 0 }}D / {{ log.nightLandings || 0 }}N
+            </span>
+            <span *ngIf="(log.dayLandings || 0) + (log.nightLandings || 0) === 0">—</span>
+          </td>
 
           <td class="p-3 space-x-3">
             <button

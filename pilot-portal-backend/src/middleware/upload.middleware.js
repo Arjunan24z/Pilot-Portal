@@ -1,5 +1,15 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+
+// Ensure upload directories exist
+const uploadDirs = ["uploads/medicals", "uploads/licenses"];
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`[UPLOAD] Created directory: ${dir}`);
+  }
+});
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

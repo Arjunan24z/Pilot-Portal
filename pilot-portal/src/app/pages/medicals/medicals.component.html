@@ -105,6 +105,52 @@
           {{ status }}
         </span>
       </div>
+
+      <!-- New Fields -->
+      <div *ngIf="medical.examinerName" class="text-slate-600 dark:text-slate-400">Examiner</div>
+      <div *ngIf="medical.examinerName" class="text-slate-900 dark:text-slate-200">
+        {{ medical.examinerName }}
+        <span *ngIf="medical.examinerNumber" class="text-slate-500 dark:text-slate-500 text-xs">
+          (AME #{{ medical.examinerNumber }})
+        </span>
+      </div>
+
+      <div *ngIf="medical.examinationDate" class="text-slate-600 dark:text-slate-400">Examination Date</div>
+      <div *ngIf="medical.examinationDate" class="text-slate-900 dark:text-slate-200">
+        {{ medical.examinationDate | date }}
+      </div>
+
+      <div *ngIf="medical.restrictions" class="text-slate-600 dark:text-slate-400">Restrictions</div>
+      <div *ngIf="medical.restrictions" class="text-red-600 dark:text-red-400 font-medium">
+        ⚠️ {{ medical.restrictions }}
+      </div>
+
+      <div *ngIf="medical.limitations" class="text-slate-600 dark:text-slate-400">Limitations</div>
+      <div *ngIf="medical.limitations" class="text-yellow-600 dark:text-yellow-400">
+        {{ medical.limitations }}
+      </div>
+
+      <div *ngIf="medical.remarks" class="text-slate-600 dark:text-slate-400">Remarks</div>
+      <div *ngIf="medical.remarks" class="text-slate-900 dark:text-slate-200 text-sm">
+        {{ medical.remarks }}
+      </div>
+    </div>
+
+    <!-- Medical History -->
+    <div *ngIf="medical.previousMedicals && medical.previousMedicals.length > 0" class="mt-4 space-y-2">
+      <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Medical History</h4>
+      <div class="space-y-1">
+        <div
+          *ngFor="let prev of medical.previousMedicals"
+          class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded p-2 text-xs"
+        >
+          <span class="font-medium">{{ prev.classType }}</span> - 
+          {{ prev.issueDate | date }} to {{ prev.expiryDate | date }}
+          <span *ngIf="prev.examinerName" class="text-slate-500 dark:text-slate-500">
+            (Dr. {{ prev.examinerName }})
+          </span>
+        </div>
+      </div>
     </div>
 
     <!-- ACTION -->
@@ -123,7 +169,7 @@
   >
 
     <p class="text-sm text-slate-700 dark:text-slate-400">
-      Upload your new medical certificate and enter validity dates.
+      Upload your new medical certificate and enter all relevant information.
     </p>
 
     <div>
@@ -142,6 +188,65 @@
         [(ngModel)]="form.expiryDate"
         class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
       />
+    </div>
+
+    <div>
+      <label class="text-sm text-slate-700 dark:text-slate-300">Aviation Medical Examiner (AME) Name</label>
+      <input
+        type="text"
+        [(ngModel)]="form.examinerName"
+        placeholder="e.g., Dr. Jane Smith"
+        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm text-slate-700 dark:text-slate-300">AME Certificate Number</label>
+      <input
+        type="text"
+        [(ngModel)]="form.examinerNumber"
+        placeholder="e.g., AME-12345"
+        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm text-slate-700 dark:text-slate-300">Examination Date</label>
+      <input
+        type="date"
+        [(ngModel)]="form.examinationDate"
+        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm text-slate-700 dark:text-slate-300">Restrictions (if any)</label>
+      <input
+        type="text"
+        [(ngModel)]="form.restrictions"
+        placeholder="e.g., Must wear corrective lenses"
+        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm text-slate-700 dark:text-slate-300">Operational Limitations (if any)</label>
+      <input
+        type="text"
+        [(ngModel)]="form.limitations"
+        placeholder="e.g., Not valid for night flying"
+        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+      />
+    </div>
+
+    <div>
+      <label class="text-sm text-slate-700 dark:text-slate-300">Remarks</label>
+      <textarea
+        [(ngModel)]="form.remarks"
+        rows="2"
+        placeholder="Additional notes..."
+        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+      ></textarea>
     </div>
 
     <div>

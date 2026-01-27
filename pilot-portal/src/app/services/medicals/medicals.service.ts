@@ -9,13 +9,28 @@ import { ApiService } from '../api/api.service';
 export interface Medical {
   _id: string;
   userId?: string;
-  classType: 'Class 1' | 'Class 2';
-  issueDate?: string;   // ISO string from backend
-  expiryDate?: string;  // ISO string
+  classType: 'Class 1' | 'Class 2' | 'Class 3';
+  issueDate?: string;
+  expiryDate?: string;
   remarks?: string;
   documentUrl?: string;
   documentName?: string;
+  examinerName?: string;
+  examinerNumber?: string;
+  examinationDate?: string;
+  restrictions?: string;
+  limitations?: string;
+  reminderDays?: number;
+  previousMedicals?: PreviousMedical[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
+export interface PreviousMedical {
+  classType: string;
+  issueDate: string;
+  expiryDate: string;
+  examinerName?: string;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -75,7 +75,12 @@ export class MedicalsComponent {
     this.form = {
       issueDate: this.medical?.issueDate || '',
       expiryDate: this.medical?.expiryDate || '',
-      remarks: ''
+      examinerName: this.medical?.examinerName || '',
+      examinerNumber: this.medical?.examinerNumber || '',
+      examinationDate: this.medical?.examinationDate || '',
+      restrictions: this.medical?.restrictions || '',
+      limitations: this.medical?.limitations || '',
+      remarks: this.medical?.remarks || ''
     };
     this.showForm = true;
   }
@@ -99,6 +104,16 @@ export class MedicalsComponent {
       formData.append('issueDate', this.form.issueDate);
     if (this.form.expiryDate)
       formData.append('expiryDate', this.form.expiryDate);
+    if (this.form.examinerName)
+      formData.append('examinerName', this.form.examinerName);
+    if (this.form.examinerNumber)
+      formData.append('examinerNumber', this.form.examinerNumber);
+    if (this.form.examinationDate)
+      formData.append('examinationDate', this.form.examinationDate);
+    if (this.form.restrictions)
+      formData.append('restrictions', this.form.restrictions);
+    if (this.form.limitations)
+      formData.append('limitations', this.form.limitations);
     if (this.form.remarks)
       formData.append('remarks', this.form.remarks);
   

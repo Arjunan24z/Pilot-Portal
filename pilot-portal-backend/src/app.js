@@ -28,6 +28,7 @@ app.use("/api/medicals", require("./routes/medicals.routes"));
 app.use("/api/logbook", require("./routes/logbook.routes"));
 app.use("/api/license", require("./routes/license.routes"));
 app.use("/api/chat", require("./routes/chat.routes"));
+app.use("/api/currency", require("./routes/currency.routes"));
 app.use("/uploads", express.static("uploads"));
 
 

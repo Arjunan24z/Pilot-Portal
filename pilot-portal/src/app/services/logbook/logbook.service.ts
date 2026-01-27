@@ -7,7 +7,33 @@ export interface LogEntry {
   _id?: string;
   date: string; 
   aircraft: string;
-  hours: number;
+  hours?: number; // Legacy field (synced with totalTime)
+  
+  // Route
+  departureAirport?: string;
+  arrivalAirport?: string;
+  
+  // Flight Time
+  totalTime?: number;
+  pilotInCommand?: number;
+  secondInCommand?: number;
+  nightTime?: number;
+  crossCountry?: number;
+  soloTime?: number;
+  dualReceived?: number;
+  dualGiven?: number;
+  
+  // Instrument Time
+  instrumentActual?: number;
+  instrumentSimulated?: number;
+  
+  // Landings
+  dayLandings?: number;
+  nightLandings?: number;
+  
+  // Metadata
+  flightType?: 'training' | 'solo' | 'personal' | 'commercial' | 'checkride';
+  instructorName?: string;
   remarks?: string;
 }
 

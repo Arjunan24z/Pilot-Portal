@@ -1,6 +1,11 @@
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
+const Medical = require("../models/medicals.model");
+const License = require("../models/license.model");
+const User = require("../models/user.model");
+const Logbook = require("../models/logbook.model");
+const currencyService = require("../services/currency.service");
 
 // TRUE AI: Using Groq's FREE API with Llama models
 // Sign up at https://console.groq.com for FREE API key
@@ -113,9 +118,191 @@ function scanProjectStructure(dir, depth = 0, maxDepth = 2) {
   return structure;
 }
 
+// Fetch user's personal data (medicals, licenses, logbook, currency)
+async function fetchUserData(userId) {
+  try {
+    const userData = {
+      medicals: [],
+      licenses: [],
+      logbook: [],
+      flightHours: {},
+      currency: {},
+      summary: ""
+    };
+
+    // Fetch user medicals
+    const medicals = await Medical.find({ userId }).sort({ expiryDate: 1 });
+    userData.medicals = medicals.map(m => ({
+      type: m.classType,
+      issueDate: m.issueDate,
+      expiryDate: m.expiryDate,
+      status: m.expiryDate ? (new Date(m.expiryDate) > new Date() ? 'Valid' : 'Expired') : 'Unknown',
+      daysUntilExpiry: m.expiryDate ? Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) : null,
+      remarks: m.remarks
+    }));
+
+    // Fetch user licenses
+    const licenses = await License.find({ userId }).sort({ expiryDate: 1 });
+    userData.licenses = licenses.map(l => ({
+      type: l.type,
+      licenseNumber: l.licenseNumber,
+      issueDate: l.issueDate,
+      expiryDate: l.expiryDate,
+      status: l.expiryDate ? (new Date(l.expiryDate) > new Date() ? 'Valid' : 'Expired') : 'Unknown',
+      daysUntilExpiry: l.expiryDate ? Math.ceil((new Date(l.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) : null,
+      remarks: l.remarks
+    }));
+
+    // Fetch logbook data
+    const logbookEntries = await Logbook.find({ userId }).sort({ date: -1 }).limit(10);
+    userData.logbook = logbookEntries.map(entry => ({
+      date: entry.date,
+      aircraft: entry.aircraft,
+      from: entry.departureAirport,
+      to: entry.arrivalAirport,
+      totalTime: entry.totalTime,
+      pic: entry.pilotInCommand,
+      night: entry.nightTime,
+      crossCountry: entry.crossCountry,
+      remarks: entry.remarks
+    }));
+
+    // Calculate flight hours totals
+    const allEntries = await Logbook.find({ userId });
+    userData.flightHours = {
+      totalTime: allEntries.reduce((sum, e) => sum + (e.totalTime || 0), 0),
+      pic: allEntries.reduce((sum, e) => sum + (e.pilotInCommand || 0), 0),
+      dualReceived: allEntries.reduce((sum, e) => sum + (e.dualReceived || 0), 0),
+      solo: allEntries.reduce((sum, e) => sum + (e.soloTime || 0), 0),
+      night: allEntries.reduce((sum, e) => sum + (e.nightTime || 0), 0),
+      crossCountry: allEntries.reduce((sum, e) => sum + (e.crossCountry || 0), 0),
+      instrument: allEntries.reduce((sum, e) => sum + (e.instrumentActual || 0) + (e.instrumentSimulated || 0), 0),
+      totalFlights: allEntries.length
+    };
+
+    // Get currency status
+    try {
+      userData.currency = await currencyService.getCurrencyStatus(userId);
+    } catch (err) {
+      console.error("Error fetching currency:", err);
+      userData.currency = { error: "Could not calculate currency" };
+    }
+
+    // Generate comprehensive summary
+    let summary = "\n=== YOUR PILOT DATA SUMMARY ===\n\n";
+    
+    // Flight Hours Summary
+    summary += "✈️ FLIGHT HOURS:\n";
+    summary += `  • Total Time: ${userData.flightHours.totalTime?.toFixed(1) || 0} hours\n`;
+    summary += `  • Pilot in Command (PIC): ${userData.flightHours.pic?.toFixed(1) || 0} hours\n`;
+    summary += `  • Dual Received: ${userData.flightHours.dualReceived?.toFixed(1) || 0} hours\n`;
+    summary += `  • Solo: ${userData.flightHours.solo?.toFixed(1) || 0} hours\n`;
+    summary += `  • Night: ${userData.flightHours.night?.toFixed(1) || 0} hours\n`;
+    summary += `  • Cross-Country: ${userData.flightHours.crossCountry?.toFixed(1) || 0} hours\n`;
+    summary += `  • Instrument: ${userData.flightHours.instrument?.toFixed(1) || 0} hours\n`;
+    summary += `  • Total Flights: ${userData.flightHours.totalFlights || 0}\n`;
+
+    // Currency Status
+    summary += "\n🕒 CURRENCY STATUS:\n";
+    if (userData.currency && userData.currency.passengerCurrency) {
+      const passCurr = userData.currency.passengerCurrency;
+      summary += `  • Passenger Currency: ${passCurr.isCurrent ? '✅ Current' : '❌ Not Current'}\n`;
+      if (passCurr.isCurrent && passCurr.daysRemaining !== null) {
+        summary += `    - Valid for ${passCurr.daysRemaining} more days\n`;
+      }
+      
+      const nightCurr = userData.currency.nightCurrency;
+      summary += `  • Night Passenger Currency: ${nightCurr.isCurrent ? '✅ Current' : '❌ Not Current'}\n`;
+      if (nightCurr.isCurrent && nightCurr.daysRemaining !== null) {
+        summary += `    - Valid for ${nightCurr.daysRemaining} more days\n`;
+      }
+      
+      const instCurr = userData.currency.instrumentCurrency;
+      summary += `  • Instrument Currency: ${instCurr.isCurrent ? '✅ Current' : '❌ Not Current'}\n`;
+      if (instCurr.isCurrent && instCurr.daysRemaining !== null) {
+        summary += `    - Valid for ${instCurr.daysRemaining} more days\n`;
+      }
+      
+      summary += `  • Overall Flight Ready: ${userData.currency.isFlightReady ? '✅ YES' : '❌ NO'}\n`;
+    }
+    
+    // Medical summary
+    summary += "\n📋 MEDICAL CERTIFICATES:\n";
+    if (medicals.length === 0) {
+      summary += "  • No medical certificates uploaded yet\n";
+    } else {
+      medicals.forEach(m => {
+        const status = m.expiryDate ? (new Date(m.expiryDate) > new Date() ? '✅ Valid' : '❌ Expired') : '⚠️ No expiry date';
+        const daysLeft = m.expiryDate ? Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+        const expiryInfo = m.expiryDate ? `Expires: ${new Date(m.expiryDate).toLocaleDateString()}` : 'No expiry date set';
+        const daysInfo = daysLeft !== null ? (daysLeft > 0 ? ` (${daysLeft} days left)` : ` (expired ${Math.abs(daysLeft)} days ago)`) : '';
+        summary += `  • ${m.classType}: ${status} - ${expiryInfo}${daysInfo}\n`;
+      });
+    }
+    
+    // License summary
+    summary += "\n📜 LICENSES:\n";
+    if (licenses.length === 0) {
+      summary += "  • No licenses uploaded yet\n";
+    } else {
+      licenses.forEach(l => {
+        const status = l.expiryDate ? (new Date(l.expiryDate) > new Date() ? '✅ Valid' : '❌ Expired') : '⚠️ No expiry date';
+        const daysLeft = l.expiryDate ? Math.ceil((new Date(l.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+        const expiryInfo = l.expiryDate ? `Expires: ${new Date(l.expiryDate).toLocaleDateString()}` : 'No expiry date set';
+        const daysInfo = daysLeft !== null ? (daysLeft > 0 ? ` (${daysLeft} days left)` : ` (expired ${Math.abs(daysLeft)} days ago)`) : '';
+        const licenseNum = l.licenseNumber ? ` #${l.licenseNumber}` : '';
+        summary += `  • ${l.type}${licenseNum}: ${status} - ${expiryInfo}${daysInfo}\n`;
+      });
+    }
+    
+    // Recent Flights
+    summary += "\n🛫 RECENT FLIGHTS (Last 10):\n";
+    if (logbookEntries.length === 0) {
+      summary += "  • No flights logged yet\n";
+    } else {
+      logbookEntries.slice(0, 5).forEach((entry, idx) => {
+        const dateStr = new Date(entry.date).toLocaleDateString();
+        const route = entry.departureAirport && entry.arrivalAirport ? `${entry.departureAirport} → ${entry.arrivalAirport}` : 'N/A';
+        const aircraft = entry.aircraft || 'N/A';
+        const time = entry.totalTime ? `${entry.totalTime.toFixed(1)}h` : 'N/A';
+        summary += `  ${idx + 1}. ${dateStr}: ${aircraft} (${route}) - ${time}\n`;
+      });
+    }
+
+    // Warnings for expiring items
+    const expiringMedicals = medicals.filter(m => m.expiryDate && Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) <= 30 && new Date(m.expiryDate) > new Date());
+    const expiringLicenses = licenses.filter(l => l.expiryDate && Math.ceil((new Date(l.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) <= 30 && new Date(l.expiryDate) > new Date());
+    
+    if (expiringMedicals.length > 0 || expiringLicenses.length > 0) {
+      summary += "\n⚠️ EXPIRING SOON (within 30 days):\n";
+      expiringMedicals.forEach(m => {
+        const daysLeft = Math.ceil((new Date(m.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+        summary += `  • ${m.classType} Medical - ${daysLeft} days left\n`;
+      });
+      expiringLicenses.forEach(l => {
+        const daysLeft = Math.ceil((new Date(l.expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
+        summary += `  • ${l.type} License - ${daysLeft} days left\n`;
+      });
+    }
+
+    summary += "\n================================\n";
+    userData.summary = summary;
+
+    return userData;
+  } catch (error) {
+    console.error("[CHAT] Error fetching user data:", error.message);
+    return {
+      medicals: [],
+      licenses: [],
+      summary: "\n⚠️ Unable to fetch your personal data at this time.\n"
+    };
+  }
+}
+
 exports.chat = async (req, res) => {
   try {
     const { message } = req.body;
+    const userId = req.user?.id; // Assuming auth middleware sets req.user
 
     if (!message) {
       return res.status(400).json({ message: "Message is required" });
@@ -129,39 +316,81 @@ exports.chat = async (req, res) => {
     
     console.log(`[CHAT] ✓ Analyzed ${Object.keys(projectCode.files).length} files from your codebase`);
 
-    // STEP 2: Build prompt with REAL CODE for AI to analyze
-    const codeSnippets = Object.entries(projectCode.files)
-      .map(([filename, code]) => `\n--- File: ${filename} ---\n${code}`)
-      .join("\n");
+    // STEP 1.5: Fetch user's personal data
+    let userData = { summary: "", medicals: [], licenses: [] };
+    if (userId) {
+      console.log("[CHAT] 📊 Fetching your personal data (medicals, licenses)...");
+      userData = await fetchUserData(userId);
+      console.log("[CHAT] ✓ Personal data loaded");
+    }
 
-    const aiPrompt = `You are analyzing a real Pilot Portal application. Here is the ACTUAL source code:
+    // STEP 2: Build enhanced prompt with user data for AI
+    const aiPrompt = `You are an intelligent Pilot Assistant AI for a real-time pilot logbook application. You have access to the user's actual flight data and can answer both aviation-related questions AND questions about the application itself.
 
-PROJECT DIRECTORY STRUCTURE:
-${projectCode.structure}
-
-ACTUAL SOURCE CODE FILES:
-${codeSnippets}
+${userData.summary}
 
 USER QUESTION: ${message}
 
 IMPORTANT INSTRUCTIONS:
-1. **Use Simple Language**: Explain like you're talking to someone who doesn't know programming
-2. **Use Real-World Analogies**: Compare technical concepts to everyday things
-3. **Step-by-Step Process**: Break down tasks into clear, numbered steps
-4. **Focus on WHAT and WHY**: Explain what happens and why, not just code syntax
-5. **Use UI Terms**: Talk about "forms", "buttons", "dropdowns", "pages" instead of "components", "functions", "APIs"
-6. **Avoid Jargon**: Don't use words like "schema", "controller", "endpoint", "model" without explaining them first
-7. **Provide Context**: Explain what each file does in simple terms (e.g., "This file stores medical certificate information")
 
-Example of BAD answer: "Update the medicalSchema in medicals.model.js by adding a new field to the mongoose schema"
+**For Personal Data Questions (flight hours, currency, medicals, licenses):**
+1. Answer directly from the user data summary above - it contains their current status
+2. Be specific with numbers and dates from their data
+3. If they ask about currency, reference the exact status from the summary
+4. If they ask about expiring items, tell them exactly how many days remain
+5. If they're not current or something is expired, suggest specific actions to regain currency
 
-Example of GOOD answer: "Think of the medical records like a form in a filing cabinet. To add a new field:
-Step 1: Open the 'Medical Records Template' file (this tells the system what information each medical certificate should have)
-Step 2: Add your new field to the template (like adding a new blank line to a paper form)
-Step 3: Update the form that pilots fill out on the website to include this new field
-Step 4: When pilots submit the form, the system will now save this new information"
+**For Aviation Knowledge Questions:**
+6. Provide accurate FAA regulatory information (14 CFR)
+7. Explain requirements for ratings, certificates, and currency
+8. Help with flight planning calculations
+9. Explain aviation weather, airspace, or operations questions
+10. Reference specific regulations when applicable
 
-ANSWER (in simple, clear language that anyone can understand):`;
+**For Application Questions:**
+11. Explain how to use features in simple terms
+12. Guide users through workflows step-by-step
+13. Explain what data is tracked and why it matters
+
+**Examples of Good Responses:**
+
+Q: "Am I current to carry passengers?"
+A: "Based on your logbook, you are ✅ CURRENT for passenger operations! You have completed 3 takeoffs and landings in the last 90 days. Your passenger currency is valid for another 45 days. Keep flying to maintain your currency!"
+
+Q: "How many hours do I have?"
+A: "You have a total of 10.3 flight hours logged, including:
+• 5.8 hours as Pilot in Command (PIC)
+• 5.5 hours of dual instruction  
+• 1.2 hours of night flying
+• 4.6 hours cross-country
+You're making great progress toward your license requirements!"
+
+Q: "When does my medical expire?"
+A: "Your Class 1 Medical Certificate expires on 12/31/2026 - that's 339 days from now. You're in good shape! You'll want to schedule your renewal appointment about 30 days before expiration."
+
+Q: "What do I need for my private pilot license?"
+A: "According to FAA regulations (14 CFR Part 61.109), you need:
+• At least 40 hours total flight time (you have 10.3 - keep going!)
+• 20 hours minimum with instructor
+• 10 hours minimum solo flight
+• 3 hours cross-country
+• 3 hours night flight (including 10 takeoffs/landings)
+• 3 hours instrument training
+• One 150+ nautical mile cross-country solo
+You're on track! Focus on building your solo and cross-country hours next."
+
+**Aviation Knowledge Base:**
+- VFR Passenger Currency: 3 takeoffs/landings in preceding 90 days
+- Night Passenger Currency: 3 night takeoffs/landings (to full stop) in preceding 90 days
+- IFR Currency: 6 approaches + holding + intercepting/tracking in preceding 6 months
+- Class 1 Medical: 12 months (under 40), 6 months (over 40) for ATP/commercial
+- Class 2 Medical: 12 months for commercial operations
+- Class 3 Medical: 60 months (under 40), 24 months (over 40) for private
+- PPL Requirements: 40 hours minimum (20 dual, 10 solo, 3 XC, 3 night, 3 instrument)
+- CPL Requirements: 250 hours minimum (100 PIC, 50 XC, 10 complex, etc.)
+- Cross-Country Definition: Flight >50nm from departure point
+
+Now answer the user's question using their actual data and aviation knowledge. Be friendly, accurate, and helpful:`;
 
     console.log(`[CHAT] 📝 Prompt prepared with real code (${aiPrompt.length} characters)`);
     console.log("[CHAT] 🚀 Sending to AI for dynamic analysis...");
@@ -188,7 +417,7 @@ ANSWER (in simple, clear language that anyone can understand):`;
             messages: [
               {
                 role: "system",
-                content: "You are a friendly assistant helping non-technical users understand a Pilot Portal application. Explain everything in simple, clear language without technical jargon. Use real-world analogies and step-by-step instructions. Focus on WHAT happens and WHY, not code syntax. When explaining how to do something, describe it like you're guiding someone through a website, not writing code."
+                content: "You are a friendly assistant helping pilots manage their Pilot Portal. You can answer questions about their personal data (medicals, licenses, expiry dates) AND explain how the application works. When asked about personal data, provide clear, direct answers from the data summary. When explaining how things work, use simple language without technical jargon. Always prioritize answering the user's specific question first, then provide additional helpful context if needed."
               },
               {
                 role: "user",
@@ -230,7 +459,7 @@ ANSWER (in simple, clear language that anyone can understand):`;
     // STEP 4: If no API keys configured, show code with explanation
     if (!answer) {
       console.log("[CHAT] ⚠️  No AI APIs configured - showing code with intelligent explanation");
-      answer = generateIntelligentCodeResponse(message, projectCode);
+      answer = generateIntelligentCodeResponse(message, projectCode, userData);
       modelUsed = "Code Analysis (No AI API configured - Please add GROQ_API_KEY)";
     }
 
@@ -240,6 +469,7 @@ ANSWER (in simple, clear language that anyone can understand):`;
       answer,
       model: modelUsed,
       codeFilesAnalyzed: Object.keys(projectCode.files).length,
+      userDataIncluded: userId ? true : false,
       timestamp: new Date().toISOString()
     });
 
@@ -253,8 +483,15 @@ ANSWER (in simple, clear language that anyone can understand):`;
 };
 
 // Intelligent code response - shows actual code with smart context
-function generateIntelligentCodeResponse(question, projectCode) {
-  let response = `**🤖 AI Code Analysis (Configure FREE Groq API for TRUE AI)**\n\n`;
+function generateIntelligentCodeResponse(question, projectCode, userData) {
+  let response = "";
+  
+  // If user data available, show it first
+  if (userData && userData.summary) {
+    response += userData.summary + "\n\n";
+  }
+  
+  response += `**🤖 AI Code Analysis (Configure FREE Groq API for TRUE AI)**\n\n`;
   response += `I analyzed ${Object.keys(projectCode.files).length} real source files from your project:\n\n`;
   
   // Show analyzed files

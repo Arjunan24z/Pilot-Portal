@@ -2,7 +2,42 @@
 
 ## What is This Chatbot?
 
-This is a TRUE AI assistant that **reads and understands your actual Pilot Portal application code**. It can answer ANY question about how the application works, using simple language that anyone can understand.
+This is a TRUE AI assistant that **reads and understands your actual Pilot Portal application code AND provides personalized information about YOUR data**. It can answer questions about:
+- ✅ **Your personal medical certificate expiry dates**
+- ✅ **Your license information and expiry**
+- ✅ **How the application works (code explanations)**
+- ✅ **Step-by-step instructions for using features**
+
+## 🆕 NEW: Personal Data Quick Review
+
+The chatbot now has access to YOUR personal pilot data and can provide instant summaries:
+
+### What You Can Ask:
+- "When does my Class 1 medical expire?"
+- "What licenses do I have uploaded?"
+- "Show me my license expiry dates"
+- "When do I need to renew my medical?"
+- "What documents are expiring soon?"
+- "Give me a quick review of my data"
+- "Do I have any expired documents?"
+
+### Example Response:
+```
+=== YOUR PILOT DATA SUMMARY ===
+
+📋 MEDICAL CERTIFICATES:
+  • Class 1: ✅ Valid - Expires: 06/15/2026 (140 days left)
+  • Class 2: ✅ Valid - Expires: 12/31/2026 (339 days left)
+
+📜 LICENSES:
+  • PPL #12345: ✅ Valid - Expires: 08/20/2027 (571 days left)
+  • CPL #67890: ✅ Valid - Expires: 10/15/2028 (1002 days left)
+
+⚠️ EXPIRING SOON (within 30 days):
+  (None - you're all good!)
+
+================================
+```
 
 ## ✨ Key Features
 

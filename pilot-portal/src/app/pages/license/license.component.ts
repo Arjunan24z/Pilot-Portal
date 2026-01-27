@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { License, LicenseService } from 'src/app/services/license/license.service';
+import { License, LicenseService, Endorsement } from 'src/app/services/license/license.service';
 
 @Component({
   selector: 'app-license',
@@ -16,12 +16,35 @@ export class LicenseComponent {
   loading = true;
   showForm = false;
   showPreview = false;
+  showEndorsementForm = false;
+  showRatingForm = false;
   message = '';
 
   selectedFile?: File;
   safePdfUrl?: SafeResourceUrl;
 
   form: Partial<License> = {};
+  endorsementForm: Partial<Endorsement> = {};
+  newRating = '';
+
+  availableRatings = [
+    'Instrument Rating',
+    'Multi-Engine Rating',
+    'Seaplane Rating',
+    'Glider Rating',
+    'Helicopter Rating',
+    'Type Rating'
+  ];
+
+  availableEndorsements = [
+    'High Performance Aircraft',
+    'Complex Aircraft',
+    'Tailwheel Aircraft',
+    'High Altitude',
+    'Pressurized Aircraft',
+    'Float Plane',
+    'Banner Towing'
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -118,6 +141,75 @@ export class LicenseComponent {
       },
       error: (err) => {
         this.message = err.error?.message || 'Error saving license';
+      }
+    });
+  }
+
+  openEndorsementForm() {
+    this.endorsementForm = {
+      endorsementType: '',
+      instructorName: '',
+      instructorCertificate: '',
+      date: new Date().toISOString().split('T')[0],
+      aircraftType: '',
+      remarks: ''
+    };
+    this.showEndorsementForm = true;
+  }
+
+  saveEndorsement() {
+    if (!this.license?._id || !this.endorsementForm.endorsementType) {
+      this.message = 'Please fill in required fields';
+      return;
+    }
+
+    this.licenseService.addEndorsement(this.license._id, this.endorsementForm).subscribe({
+      next: (updatedLicense) => {
+        this.license = updatedLicense;
+        this.showEndorsementForm = false;
+        this.message = 'Endorsement added successfully';
+        this.loadLicense();
+      },
+      error: (err) => {
+        this.message = err.error?.message || 'Error adding endorsement';
+      }
+    });
+  }
+
+  openRatingForm() {
+    this.newRating = '';
+    this.showRatingForm = true;
+  }
+
+  saveRating() {
+    if (!this.license?._id || !this.newRating) {
+      this.message = 'Please select a rating';
+      return;
+    }
+
+    this.licenseService.addRating(this.license._id, this.newRating).subscribe({
+      next: (updatedLicense) => {
+        this.license = updatedLicense;
+        this.showRatingForm = false;
+        this.message = 'Rating added successfully';
+        this.loadLicense();
+      },
+      error: (err) => {
+        this.message = err.error?.message || 'Error adding rating';
+      }
+    });
+  }
+
+  removeEndorsement(endorsementId: string) {
+    if (!this.license?._id || !confirm('Remove this endorsement?')) return;
+
+    this.licenseService.removeEndorsement(this.license._id, endorsementId).subscribe({
+      next: () => {
+        this.message = 'Endorsement removed';
+        this.loadLicense();
+      },
+      error: (err) => {
+        this.message = err.error?.message || 'Error removing endorsement';
       }
     });
   }

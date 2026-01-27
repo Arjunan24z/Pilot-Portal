@@ -3,6 +3,7 @@ import { LicenseService } from 'src/app/services/license/license.service';
 import { LogbookService } from 'src/app/services/logbook/logbook.service';
 import { MedicalsService } from 'src/app/services/medicals/medicals.service';
 import { UserService } from 'src/app/services/user/user.service';
+import { CurrencyService } from 'src/app/services/currency/currency.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,6 +18,10 @@ export class DashboardComponent implements OnInit {
   licenseAlerts: any[] = [];
   logbookSummary: any[] = [];
 
+  // Currency Status
+  currencyStatus: any = null;
+  hoursBreakdown: any = null;
+
   // 🔹 Derived dashboard metrics
   flightReady = false;
   totalHours = 0;
@@ -29,7 +34,8 @@ export class DashboardComponent implements OnInit {
     private userService: UserService,
     private medicalService: MedicalsService,
     private logbookService: LogbookService,
-    private licenseService: LicenseService
+    private licenseService: LicenseService,
+    private currencyService: CurrencyService
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +79,25 @@ export class DashboardComponent implements OnInit {
         this.licenseAlerts = this.formatLicenses(licData);
         this.evaluateFlightReadiness();
       }
+    });
+
+    // 5️⃣ Currency Status (NEW!)
+    this.currencyService.getCurrencyStatus().subscribe({
+      next: (res: any) => {
+        this.currencyStatus = res;
+        this.flightReady = res.isFlightReady || false;
+      },
+      error: (err) => console.error('Currency error:', err)
+    });
+
+    // 6️⃣ Flight Hours Breakdown (NEW!)
+    this.currencyService.getFlightHoursBreakdown().subscribe({
+      next: (res: any) => {
+        this.hoursBreakdown = res;
+        this.totalHours = res.totalTime || 0;
+        this.totalFlights = res.totalFlights || 0;
+      },
+      error: (err) => console.error('Hours breakdown error:', err)
     });
 
     this.loading = false;

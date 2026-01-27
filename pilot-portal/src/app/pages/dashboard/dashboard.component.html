@@ -91,6 +91,182 @@
 
   </div>
 
+  <!-- CURRENCY STATUS (NEW!) -->
+  <div *ngIf="currencyStatus" class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover">
+    <h3 class="text-xl font-bold mb-6 flex items-center space-x-3">
+      <span class="text-2xl">📋</span>
+      <span>Currency Status</span>
+    </h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Passenger Currency -->
+      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+           [ngClass]="{
+             'border-green-500': currencyStatus.passengerCurrency?.status === 'CURRENT',
+             'border-red-500': currencyStatus.passengerCurrency?.status === 'EXPIRED'
+           }">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Passenger Currency</span>
+          <span class="text-lg"
+                [ngClass]="{
+                  'text-green-500': currencyStatus.passengerCurrency?.status === 'CURRENT',
+                  'text-red-500': currencyStatus.passengerCurrency?.status === 'EXPIRED'
+                }">
+            {{ currencyStatus.passengerCurrency?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
+          {{ currencyStatus.passengerCurrency?.message }}
+        </p>
+        <p *ngIf="currencyStatus.passengerCurrency?.daysRemaining > 0" class="text-sm font-bold"
+           [ngClass]="{
+             'text-green-600 dark:text-green-400': currencyStatus.passengerCurrency?.daysRemaining > 30,
+             'text-yellow-600 dark:text-yellow-400': currencyStatus.passengerCurrency?.daysRemaining <= 30 && currencyStatus.passengerCurrency?.daysRemaining > 7,
+             'text-red-600 dark:text-red-400': currencyStatus.passengerCurrency?.daysRemaining <= 7
+           }">
+          {{ currencyStatus.passengerCurrency?.daysRemaining }} days remaining
+        </p>
+      </div>
+
+      <!-- Night Currency -->
+      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+           [ngClass]="{
+             'border-green-500': currencyStatus.nightCurrency?.status === 'CURRENT',
+             'border-red-500': currencyStatus.nightCurrency?.status === 'EXPIRED'
+           }">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Night Currency</span>
+          <span class="text-lg"
+                [ngClass]="{
+                  'text-green-500': currencyStatus.nightCurrency?.status === 'CURRENT',
+                  'text-red-500': currencyStatus.nightCurrency?.status === 'EXPIRED'
+                }">
+            {{ currencyStatus.nightCurrency?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
+          {{ currencyStatus.nightCurrency?.message }}
+        </p>
+        <p *ngIf="currencyStatus.nightCurrency?.daysRemaining > 0" class="text-sm font-bold"
+           [ngClass]="{
+             'text-green-600 dark:text-green-400': currencyStatus.nightCurrency?.daysRemaining > 30,
+             'text-yellow-600 dark:text-yellow-400': currencyStatus.nightCurrency?.daysRemaining <= 30 && currencyStatus.nightCurrency?.daysRemaining > 7,
+             'text-red-600 dark:text-red-400': currencyStatus.nightCurrency?.daysRemaining <= 7
+           }">
+          {{ currencyStatus.nightCurrency?.daysRemaining }} days remaining
+        </p>
+      </div>
+
+      <!-- Flight Review -->
+      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+           [ngClass]="{
+             'border-green-500': currencyStatus.flightReview?.status === 'CURRENT',
+             'border-red-500': currencyStatus.flightReview?.status === 'EXPIRED'
+           }">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Flight Review</span>
+          <span class="text-lg"
+                [ngClass]="{
+                  'text-green-500': currencyStatus.flightReview?.status === 'CURRENT',
+                  'text-red-500': currencyStatus.flightReview?.status === 'EXPIRED'
+                }">
+            {{ currencyStatus.flightReview?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
+          {{ currencyStatus.flightReview?.message }}
+        </p>
+        <p *ngIf="currencyStatus.flightReview?.daysRemaining > 0" class="text-sm font-bold"
+           [ngClass]="{
+             'text-green-600 dark:text-green-400': currencyStatus.flightReview?.daysRemaining > 30,
+             'text-yellow-600 dark:text-yellow-400': currencyStatus.flightReview?.daysRemaining <= 30,
+             'text-red-600 dark:text-red-400': currencyStatus.flightReview?.daysRemaining <= 7
+           }">
+          {{ currencyStatus.flightReview?.daysRemaining }} days remaining
+        </p>
+      </div>
+
+      <!-- Instrument Currency -->
+      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+           [ngClass]="{
+             'border-green-500': currencyStatus.instrumentCurrency?.status === 'CURRENT',
+             'border-red-500': currencyStatus.instrumentCurrency?.status === 'EXPIRED'
+           }">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Instrument Currency</span>
+          <span class="text-lg"
+                [ngClass]="{
+                  'text-green-500': currencyStatus.instrumentCurrency?.status === 'CURRENT',
+                  'text-red-500': currencyStatus.instrumentCurrency?.status === 'EXPIRED'
+                }">
+            {{ currencyStatus.instrumentCurrency?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          </span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          {{ currencyStatus.instrumentCurrency?.message }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Next Expiring Alert -->
+    <div *ngIf="currencyStatus.nextExpiring" class="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-3">
+      <div class="flex items-center space-x-2">
+        <span class="text-yellow-600 dark:text-yellow-400 text-lg">⚠️</span>
+        <div>
+          <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
+            {{ currencyStatus.nextExpiring.name }} expiring soon
+          </p>
+          <p class="text-xs text-yellow-700 dark:text-yellow-400">
+            {{ currencyStatus.nextExpiring.days }} days remaining
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLIGHT HOURS BREAKDOWN (NEW!) -->
+  <div *ngIf="hoursBreakdown" class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover">
+    <h3 class="text-xl font-bold mb-6 flex items-center space-x-3">
+      <span class="text-2xl">📊</span>
+      <span>Flight Hours Breakdown</span>
+    </h3>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">PIC</p>
+        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ hoursBreakdown.pilotInCommand | number:'1.1-1' }}</p>
+      </div>
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Night</p>
+        <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ hoursBreakdown.nightTime | number:'1.1-1' }}</p>
+      </div>
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Cross Country</p>
+        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ hoursBreakdown.crossCountry | number:'1.1-1' }}</p>
+      </div>
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Instrument</p>
+        <p class="text-2xl font-bold text-pink-600 dark:text-pink-400">{{ hoursBreakdown.totalInstrument | number:'1.1-1' }}</p>
+      </div>
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Dual Received</p>
+        <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ hoursBreakdown.dualReceived | number:'1.1-1' }}</p>
+      </div>
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Solo</p>
+        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ hoursBreakdown.soloTime | number:'1.1-1' }}</p>
+      </div>
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Day Landings</p>
+        <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ hoursBreakdown.dayLandings }}</p>
+      </div>
+      <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Night Landings</p>
+        <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ hoursBreakdown.nightLandings }}</p>
+      </div>
+    </div>
+  </div>
+
   <!-- COMPLIANCE TABLES -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 

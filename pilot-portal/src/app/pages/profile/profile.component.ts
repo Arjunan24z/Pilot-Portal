@@ -40,10 +40,25 @@ export class ProfileComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.message = "Profile updated successfully!";
+        setTimeout(() => {
+          this.message = '';
+        }, 3000);
       },
       error: () => {
         this.message = "Error updating profile!";
+        setTimeout(() => {
+          this.message = '';
+        }, 3000);
       }
     });
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'P';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
   }
 }

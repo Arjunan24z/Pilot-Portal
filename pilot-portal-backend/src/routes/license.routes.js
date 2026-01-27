@@ -6,28 +6,35 @@ const {
   createLicense,
   getLicenses,
   updateLicense,
-  deleteLicense
+  deleteLicense,
+  addEndorsement,
+  addRating,
+  removeEndorsement
 } = require("../controllers/license.controller");
 
 const router = express.Router();
 
+// License CRUD
 router.post(
   "/",
   auth,
-  upload.single("document"), // ✅ THIS WAS MISSING
+  upload.single("document"),
   createLicense
 );
 
 router.put(
   "/:id",
   auth,
-  upload.single("document"), // ✅ THIS TOO
+  upload.single("document"),
   updateLicense
 );
 
 router.get("/", auth, getLicenses);
 router.delete("/:id", auth, deleteLicense);
 
-module.exports = router;
+// Endorsements and Ratings
+router.post("/:id/endorsements", auth, addEndorsement);
+router.post("/:id/ratings", auth, addRating);
+router.delete("/:id/endorsements/:endorsementId", auth, removeEndorsement);
 
 module.exports = router;

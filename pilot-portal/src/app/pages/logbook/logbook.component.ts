@@ -28,7 +28,22 @@ export class LogbookComponent implements OnInit {
   entry: LogEntry = {
     date: '',
     aircraft: '',
-    hours: 0,
+    totalTime: 0,
+    pilotInCommand: 0,
+    secondInCommand: 0,
+    nightTime: 0,
+    crossCountry: 0,
+    soloTime: 0,
+    dualReceived: 0,
+    dualGiven: 0,
+    instrumentActual: 0,
+    instrumentSimulated: 0,
+    dayLandings: 0,
+    nightLandings: 0,
+    departureAirport: '',
+    arrivalAirport: '',
+    flightType: 'personal',
+    instructorName: '',
     remarks: ''
   };
 
@@ -48,7 +63,7 @@ export class LogbookComponent implements OnInit {
   
         this.totalFlights = this.logbook.length;
         this.totalHours = this.logbook.reduce(
-          (sum, l) => sum + (Number(l.hours) || 0),
+          (sum, l) => sum + (Number(l.totalTime || l.hours) || 0),
           0
         );
   
@@ -78,7 +93,7 @@ export class LogbookComponent implements OnInit {
       const date = new Date(log.date);
       const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
   
-      monthlyMap[key] = (monthlyMap[key] || 0) + Number(log.hours || 0);
+      monthlyMap[key] = (monthlyMap[key] || 0) + Number(log.totalTime || log.hours || 0);
     });
   
     const sortedKeys = Object.keys(monthlyMap).sort();
@@ -151,7 +166,8 @@ export class LogbookComponent implements OnInit {
       }
   
       map[key].flights += 1;
-      map[key].hours += Number(entry.hours) || 0;
+      // Use totalTime if available, fallback to legacy hours field
+      map[key].hours += Number(entry.totalTime || entry.hours) || 0;
     });
   
     this.aircraftSummary = Object.values(map);
@@ -190,11 +206,10 @@ export class LogbookComponent implements OnInit {
   
 
   saveEntry() {
+    // Sync legacy hours field with totalTime for backward compatibility
     const body: LogEntry = {
-      date: this.entry.date,
-      aircraft: this.entry.aircraft,
-      hours: this.entry.hours,
-      remarks: this.entry.remarks
+      ...this.entry,
+      hours: this.entry.totalTime
     };
 
     if (!this.editingId) {
@@ -233,7 +248,27 @@ export class LogbookComponent implements OnInit {
   }
 
   resetForm() {
-    this.entry = { date: '', aircraft: '', hours: 0, remarks: '' };
+    this.entry = {
+      date: '',
+      aircraft: '',
+      totalTime: 0,
+      pilotInCommand: 0,
+      secondInCommand: 0,
+      nightTime: 0,
+      crossCountry: 0,
+      soloTime: 0,
+      dualReceived: 0,
+      dualGiven: 0,
+      instrumentActual: 0,
+      instrumentSimulated: 0,
+      dayLandings: 0,
+      nightLandings: 0,
+      departureAirport: '',
+      arrivalAirport: '',
+      flightType: 'personal',
+      instructorName: '',
+      remarks: ''
+    };
     this.editingId = null;
   }
 }
