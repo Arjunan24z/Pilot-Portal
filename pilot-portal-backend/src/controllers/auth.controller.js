@@ -40,6 +40,10 @@ exports.loginUser = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
 
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: "JWT secret is not configured" });
+    }
+
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET,
@@ -52,6 +56,25 @@ exports.loginUser = async (req, res) => {
       userId: user._id,
     });
 
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
