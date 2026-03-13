@@ -24,6 +24,7 @@ export class LogbookComponent implements OnInit {
   lastSyncedAt: Date | null = null;
   isRefreshing = false;
   private refreshTimer?: ReturnType<typeof setInterval>;
+  private lastChartSignature = '';
 
   // Cached computed properties — updated only when data loads
   averageHoursPerFlight = 0;
@@ -89,6 +90,8 @@ export class LogbookComponent implements OnInit {
     this.logbookService.getAll().subscribe({
       next: (res) => {
         this.logbook = res || [];
+        const nextSignature = this.buildChartSignature(this.logbook);
+        const shouldRenderCharts = nextSignature !== this.lastChartSignature;
   
         this.totalFlights = this.logbook.length;
         this.totalHours = this.logbook.reduce(
@@ -105,8 +108,11 @@ export class LogbookComponent implements OnInit {
   
         this.calculateAircraftSummary();
         this.computeInsights();
-        this.renderMonthlyChart();
-        this.renderFlightTypeChart();
+        if (shouldRenderCharts) {
+          this.renderMonthlyChart();
+          this.renderFlightTypeChart();
+          this.lastChartSignature = nextSignature;
+        }
         this.lastSyncedAt = new Date();
         this.isRefreshing = false;
         this.cdr.markForCheck();
@@ -129,6 +135,9 @@ export class LogbookComponent implements OnInit {
     }
 
     this.refreshTimer = setInterval(() => {
+      if (document.hidden) {
+        return;
+      }
       this.loadLogbook(true);
     }, this.refreshIntervalSeconds * 1000);
   }
@@ -140,6 +149,18 @@ export class LogbookComponent implements OnInit {
 
   manualRefresh() {
     this.loadLogbook();
+  }
+
+  private buildChartSignature(entries: LogEntry[]): string {
+    const head = entries.slice(0, 20).map((entry) => {
+      const id = entry._id || '';
+      const date = entry.date || '';
+      const totalTime = Number(entry.totalTime || entry.hours || 0);
+      const type = this.normalizeFlightType(entry.flightType as string);
+      return `${id}:${date}:${totalTime}:${type}`;
+    }).join('|');
+
+    return `${entries.length}:${head}`;
   }
 
   

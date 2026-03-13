@@ -20,7 +20,8 @@ class CurrencyService {
       dayLandings: { $gt: 0 }
     })
       .sort({ date: -1 })
-      .limit(10);
+      .limit(10)
+      .lean();
 
     const totalDayLandings = recentFlights.reduce(
       (sum, flight) => sum + (flight.dayLandings || 0),
@@ -78,7 +79,8 @@ class CurrencyService {
       nightLandings: { $gt: 0 }
     })
       .sort({ date: -1 })
-      .limit(10);
+      .limit(10)
+      .lean();
 
     const totalNightLandings = recentFlights.reduce(
       (sum, flight) => sum + (flight.nightLandings || 0),
@@ -139,7 +141,8 @@ class CurrencyService {
         { instrumentSimulated: { $gt: 0 } }
       ]
     })
-      .sort({ date: -1 });
+      .sort({ date: -1 })
+      .lean();
 
     const totalInstrumentTime = recentFlights.reduce(
       (sum, flight) =>
@@ -175,7 +178,8 @@ class CurrencyService {
       date: { $gte: twoYearsAgo },
       dualReceived: { $gt: 0 }
     })
-      .sort({ date: -1 });
+      .sort({ date: -1 })
+      .lean();
 
     const isCurrent = !!recentTraining;
 
@@ -246,7 +250,7 @@ class CurrencyService {
    * Calculate total flight hours breakdown
    */
   async getFlightHoursBreakdown(userId) {
-    const allFlights = await Logbook.find({ userId });
+    const allFlights = await Logbook.find({ userId }).lean();
 
     const breakdown = {
       totalTime: 0,

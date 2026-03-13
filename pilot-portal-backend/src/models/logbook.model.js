@@ -51,6 +51,11 @@ const logbookSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+logbookSchema.index({ userId: 1, date: -1 });
+logbookSchema.index({ userId: 1, dayLandings: 1, date: -1 });
+logbookSchema.index({ userId: 1, nightLandings: 1, date: -1 });
+logbookSchema.index({ userId: 1, instrumentActual: 1, instrumentSimulated: 1, date: -1 });
+
 // Pre-save hook to sync legacy 'hours' field with 'totalTime'
 logbookSchema.pre('save', function() {
   // If hours is provided but totalTime isn't, use hours for totalTime

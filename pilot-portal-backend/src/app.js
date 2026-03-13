@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const { ensureJwtSecret } = require("./config/jwt");
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Connect DB
 connectDB();
+ensureJwtSecret();
 
 // Health check endpoint for Docker
 app.get("/api/health", (req, res) => {

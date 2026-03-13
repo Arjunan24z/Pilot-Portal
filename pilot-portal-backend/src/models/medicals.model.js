@@ -48,6 +48,8 @@ const medicalSchema = new mongoose.Schema({
   }
 });
 
+medicalSchema.index({ userId: 1, expiryDate: 1 });
+
 // Pre-save hook to update timestamps
 medicalSchema.pre('save', function() {
   this.updatedAt = Date.now();

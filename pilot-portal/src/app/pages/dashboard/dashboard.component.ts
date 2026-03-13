@@ -4,6 +4,8 @@ import { LogbookService } from 'src/app/services/logbook/logbook.service';
 import { MedicalsService } from 'src/app/services/medicals/medicals.service';
 import { UserService } from 'src/app/services/user/user.service';
 import { CurrencyService } from 'src/app/services/currency/currency.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -51,71 +53,51 @@ export class DashboardComponent implements OnInit {
   loadDashboard() {
     this.loading = true;
 
-    // 1️⃣ Profile
-    this.userService.getProfile().subscribe({
-      next: (res) => { this.profileSummary = res || {}; this.cdr.markForCheck(); },
-      error: (err) => console.error(err)
-    });
+    forkJoin({
+      profile: this.userService.getProfile().pipe(catchError(() => of({}))),
+      medicals: this.medicalService.getAll().pipe(catchError(() => of([]))),
+      logbook: this.logbookService.getAll().pipe(catchError(() => of([]))),
+      licenses: this.licenseService.getAll().pipe(catchError(() => of([]))),
+      currencyStatus: this.currencyService.getCurrencyStatus().pipe(catchError(() => of(null))),
+      hoursBreakdown: this.currencyService.getFlightHoursBreakdown().pipe(catchError(() => of(null)))
+    }).subscribe({
+      next: ({ profile, medicals, logbook, licenses, currencyStatus, hoursBreakdown }) => {
+        this.profileSummary = profile || {};
 
-    // 2️⃣ Medicals
-    this.medicalService.getAll().subscribe({
-      next: (res: any) => {
-        const medData = Array.isArray(res) ? res : (res.medicals || []);
+        const medData = Array.isArray(medicals) ? medicals : ((medicals as any)?.medicals || []);
         this.medicalStatus = this.formatMedicalStatus(medData);
-        this.evaluateFlightReadiness();
-        this.computeAiInsights();
-        this.cdr.markForCheck();
-      }
-    });
 
-    // 3️⃣ Logbook
-    this.logbookService.getAll().subscribe({
-      next: (res: any) => {
-        const logData = Array.isArray(res)
-          ? res
-          : (res.entries || res.logbook || []);
-
+        const logData = Array.isArray(logbook)
+          ? logbook
+          : ((logbook as any)?.entries || (logbook as any)?.logbook || []);
         this.logbookSummary = logData.slice(-5).reverse();
         this.calculateLogbookStats(logData);
-        this.computeAiInsights();
-        this.cdr.markForCheck();
-      }
-    });
 
-    // 4️⃣ Licenses
-    this.licenseService.getAll().subscribe({
-      next: (res: any) => {
-        const licData = Array.isArray(res) ? res : (res.licenses || []);
+        const licData = Array.isArray(licenses) ? licenses : ((licenses as any)?.licenses || []);
         this.licenseAlerts = this.formatLicenses(licData);
-        this.evaluateFlightReadiness();
+
+        this.currencyStatus = currencyStatus;
+        if (currencyStatus) {
+          this.flightReady = currencyStatus.isFlightReady || false;
+        } else {
+          this.evaluateFlightReadiness();
+        }
+
+        this.hoursBreakdown = hoursBreakdown;
+        if (hoursBreakdown) {
+          this.totalHours = hoursBreakdown.totalTime || this.totalHours;
+          this.totalFlights = hoursBreakdown.totalFlights || this.totalFlights;
+        }
+
         this.computeAiInsights();
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading = false;
         this.cdr.markForCheck();
       }
     });
-
-    // 5️⃣ Currency Status (NEW!)
-    this.currencyService.getCurrencyStatus().subscribe({
-      next: (res: any) => {
-        this.currencyStatus = res;
-        this.flightReady = res.isFlightReady || false;
-        this.computeAiInsights();
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error('Currency error:', err)
-    });
-
-    // 6️⃣ Flight Hours Breakdown (NEW!)
-    this.currencyService.getFlightHoursBreakdown().subscribe({
-      next: (res: any) => {
-        this.hoursBreakdown = res;
-        this.totalHours = res.totalTime || 0;
-        this.totalFlights = res.totalFlights || 0;
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error('Hours breakdown error:', err)
-    });
-
-    this.loading = false;
   }
 
   /* ===========================

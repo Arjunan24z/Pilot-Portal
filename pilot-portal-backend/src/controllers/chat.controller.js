@@ -1,11 +1,19 @@
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
+const { Types } = require("mongoose");
 const Medical = require("../models/medicals.model");
 const License = require("../models/license.model");
-const User = require("../models/user.model");
 const Logbook = require("../models/logbook.model");
 const currencyService = require("../services/currency.service");
+
+const CHAT_API_TIMEOUT_MS = Number(process.env.CHAT_API_TIMEOUT_MS || 12000);
+const ENABLE_CHAT_CODE_ANALYSIS = process.env.ENABLE_CHAT_CODE_ANALYSIS === "true";
+const CHAT_CODE_ANALYSIS_TTL_MS = Number(process.env.CHAT_CODE_ANALYSIS_TTL_MS || 600000);
+const CHAT_DEBUG_LOGS = process.env.CHAT_DEBUG_LOGS === "true";
+
+let projectCodeCache = null;
+let projectCodeCacheAt = 0;
 
 // TRUE AI: Using Groq's FREE API with Llama models
 // Sign up at https://console.groq.com for FREE API key
@@ -88,6 +96,21 @@ function analyzeProjectCode() {
   return codeAnalysis;
 }
 
+function getProjectCodeAnalysis() {
+  if (!ENABLE_CHAT_CODE_ANALYSIS) {
+    return { files: {}, structure: "" };
+  }
+
+  const now = Date.now();
+  if (projectCodeCache && (now - projectCodeCacheAt) < CHAT_CODE_ANALYSIS_TTL_MS) {
+    return projectCodeCache;
+  }
+
+  projectCodeCache = analyzeProjectCode();
+  projectCodeCacheAt = now;
+  return projectCodeCache;
+}
+
 // Scan project directory structure
 function scanProjectStructure(dir, depth = 0, maxDepth = 2) {
   if (depth > maxDepth) return "";
@@ -131,7 +154,10 @@ async function fetchUserData(userId) {
     };
 
     // Fetch user medicals
-    const medicals = await Medical.find({ userId }).sort({ expiryDate: 1 });
+    const medicals = await Medical.find({ userId })
+      .select("classType issueDate expiryDate remarks")
+      .sort({ expiryDate: 1 })
+      .lean();
     userData.medicals = medicals.map(m => ({
       type: m.classType,
       issueDate: m.issueDate,
@@ -142,7 +168,10 @@ async function fetchUserData(userId) {
     }));
 
     // Fetch user licenses
-    const licenses = await License.find({ userId }).sort({ expiryDate: 1 });
+    const licenses = await License.find({ userId })
+      .select("type licenseNumber issueDate expiryDate remarks")
+      .sort({ expiryDate: 1 })
+      .lean();
     userData.licenses = licenses.map(l => ({
       type: l.type,
       licenseNumber: l.licenseNumber,
@@ -154,7 +183,11 @@ async function fetchUserData(userId) {
     }));
 
     // Fetch logbook data
-    const logbookEntries = await Logbook.find({ userId }).sort({ date: -1 }).limit(10);
+    const logbookEntries = await Logbook.find({ userId })
+      .select("date aircraft departureAirport arrivalAirport totalTime pilotInCommand nightTime crossCountry remarks")
+      .sort({ date: -1 })
+      .limit(10)
+      .lean();
     userData.logbook = logbookEntries.map(entry => ({
       date: entry.date,
       aircraft: entry.aircraft,
@@ -168,16 +201,38 @@ async function fetchUserData(userId) {
     }));
 
     // Calculate flight hours totals
-    const allEntries = await Logbook.find({ userId });
+    const normalizedUserId = Types.ObjectId.isValid(String(userId))
+      ? new Types.ObjectId(String(userId))
+      : String(userId);
+
+    const hoursAgg = await Logbook.aggregate([
+      { $match: { userId: normalizedUserId } },
+      {
+        $group: {
+          _id: null,
+          totalTime: { $sum: { $ifNull: ["$totalTime", 0] } },
+          pic: { $sum: { $ifNull: ["$pilotInCommand", 0] } },
+          dualReceived: { $sum: { $ifNull: ["$dualReceived", 0] } },
+          solo: { $sum: { $ifNull: ["$soloTime", 0] } },
+          night: { $sum: { $ifNull: ["$nightTime", 0] } },
+          crossCountry: { $sum: { $ifNull: ["$crossCountry", 0] } },
+          instrumentActual: { $sum: { $ifNull: ["$instrumentActual", 0] } },
+          instrumentSimulated: { $sum: { $ifNull: ["$instrumentSimulated", 0] } },
+          totalFlights: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const totals = hoursAgg[0] || {};
     userData.flightHours = {
-      totalTime: allEntries.reduce((sum, e) => sum + (e.totalTime || 0), 0),
-      pic: allEntries.reduce((sum, e) => sum + (e.pilotInCommand || 0), 0),
-      dualReceived: allEntries.reduce((sum, e) => sum + (e.dualReceived || 0), 0),
-      solo: allEntries.reduce((sum, e) => sum + (e.soloTime || 0), 0),
-      night: allEntries.reduce((sum, e) => sum + (e.nightTime || 0), 0),
-      crossCountry: allEntries.reduce((sum, e) => sum + (e.crossCountry || 0), 0),
-      instrument: allEntries.reduce((sum, e) => sum + (e.instrumentActual || 0) + (e.instrumentSimulated || 0), 0),
-      totalFlights: allEntries.length
+      totalTime: totals.totalTime || 0,
+      pic: totals.pic || 0,
+      dualReceived: totals.dualReceived || 0,
+      solo: totals.solo || 0,
+      night: totals.night || 0,
+      crossCountry: totals.crossCountry || 0,
+      instrument: (totals.instrumentActual || 0) + (totals.instrumentSimulated || 0),
+      totalFlights: totals.totalFlights || 0
     };
 
     // Get currency status
@@ -302,26 +357,22 @@ async function fetchUserData(userId) {
 exports.chat = async (req, res) => {
   try {
     const { message } = req.body;
-    const userId = req.user?.id; // Assuming auth middleware sets req.user
+    const userId = req.user?.userId;
 
     if (!message) {
       return res.status(400).json({ message: "Message is required" });
     }
 
-    console.log(`\n[CHAT] 🤖 User Question: "${message}"`);
-    console.log("[CHAT] 📂 Reading actual project source code...");
+    if (CHAT_DEBUG_LOGS) {
+      console.log(`\n[CHAT] User Question: "${message}"`);
+    }
 
-    // STEP 1: Read and analyze YOUR actual project files
-    const projectCode = analyzeProjectCode();
-    
-    console.log(`[CHAT] ✓ Analyzed ${Object.keys(projectCode.files).length} files from your codebase`);
+    const projectCode = getProjectCodeAnalysis();
 
     // STEP 1.5: Fetch user's personal data
     let userData = { summary: "", medicals: [], licenses: [] };
     if (userId) {
-      console.log("[CHAT] 📊 Fetching your personal data (medicals, licenses)...");
       userData = await fetchUserData(userId);
-      console.log("[CHAT] ✓ Personal data loaded");
     }
 
     // STEP 2: Build enhanced prompt with user data for AI
@@ -392,8 +443,9 @@ You're on track! Focus on building your solo and cross-country hours next."
 
 Now answer the user's question using their actual data and aviation knowledge. Be friendly, accurate, and helpful:`;
 
-    console.log(`[CHAT] 📝 Prompt prepared with real code (${aiPrompt.length} characters)`);
-    console.log("[CHAT] 🚀 Sending to AI for dynamic analysis...");
+    if (CHAT_DEBUG_LOGS) {
+      console.log(`[CHAT] Prompt prepared (${aiPrompt.length} chars)`);
+    }
 
     let answer = null;
     let modelUsed = null;
@@ -401,11 +453,15 @@ Now answer the user's question using their actual data and aviation knowledge. B
     // STEP 3: Send REAL CODE to TRUE AI for intelligent analysis
     for (const model of AI_MODELS) {
       try {
-        console.log(`[CHAT]   → Calling ${model.name}...`);
+        if (CHAT_DEBUG_LOGS) {
+          console.log(`[CHAT] Calling ${model.name}...`);
+        }
         
         // Check if API key is configured
         if (!model.apiKey || model.apiKey.includes("YOUR_FREE") || model.apiKey === "") {
-          console.log(`[CHAT]   ⚠️  ${model.provider} API key not configured - skipping`);
+          if (CHAT_DEBUG_LOGS) {
+            console.log(`[CHAT] ${model.provider} API key not configured - skipping`);
+          }
           continue;
         }
 
@@ -436,7 +492,7 @@ Now answer the user's question using their actual data and aviation knowledge. B
                 "X-Title": "Pilot Portal"
               })
             },
-            timeout: 35000
+            timeout: CHAT_API_TIMEOUT_MS
           }
         );
 
@@ -446,24 +502,28 @@ Now answer the user's question using their actual data and aviation knowledge. B
           if (aiText.length > 60) {
             answer = aiText;
             modelUsed = `${model.name} (TRUE AI Code Analysis)`;
-            console.log(`[CHAT] ✅ ${model.name} generated intelligent response (${aiText.length} chars)`);
+            if (CHAT_DEBUG_LOGS) {
+              console.log(`[CHAT] ${model.name} generated response (${aiText.length} chars)`);
+            }
             break;
           }
         }
       } catch (error) {
         const errorMsg = error.response?.data?.error?.message || error.message;
-        console.log(`[CHAT]   ✗ ${model.name} failed: ${errorMsg}`);
+        if (CHAT_DEBUG_LOGS) {
+          console.log(`[CHAT] ${model.name} failed: ${errorMsg}`);
+        }
       }
     }
 
     // STEP 4: If no API keys configured, show code with explanation
     if (!answer) {
-      console.log("[CHAT] ⚠️  No AI APIs configured - showing code with intelligent explanation");
+      if (CHAT_DEBUG_LOGS) {
+        console.log("[CHAT] No AI APIs configured - using local fallback");
+      }
       answer = generateIntelligentCodeResponse(message, projectCode, userData);
       modelUsed = "Code Analysis (No AI API configured - Please add GROQ_API_KEY)";
     }
-
-    console.log(`[CHAT] ✓ Response ready from: ${modelUsed}\n`);
     
     res.json({ 
       answer,
@@ -474,7 +534,7 @@ Now answer the user's question using their actual data and aviation knowledge. B
     });
 
   } catch (error) {
-    console.error("[CHAT] Critical error:", error);
+    console.error("[CHAT] Critical error:", error.message);
     res.status(500).json({ 
       message: "Error processing chat",
       error: error.message 

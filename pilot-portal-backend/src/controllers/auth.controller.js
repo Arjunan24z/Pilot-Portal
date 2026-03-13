@@ -2,6 +2,7 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { ensureJwtSecret } = require("../config/jwt");
 
 exports.registerUser = async (req, res) => {
   try {
@@ -40,13 +41,11 @@ exports.loginUser = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid email or password" });
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ message: "JWT secret is not configured" });
-    }
+    const jwtSecret = ensureJwtSecret();
 
     const token = jwt.sign(
       { userId: user._id, email: user.email },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: "7d" }
     );
 

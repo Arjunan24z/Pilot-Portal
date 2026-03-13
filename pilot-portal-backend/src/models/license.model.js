@@ -41,4 +41,6 @@ const licenseSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+licenseSchema.index({ userId: 1, expiryDate: 1 });
+
 module.exports = mongoose.model("License", licenseSchema);
