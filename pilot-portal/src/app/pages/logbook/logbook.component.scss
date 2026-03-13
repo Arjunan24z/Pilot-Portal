@@ -1,0 +1,219 @@
+:host {
+	--log-bg:
+		radial-gradient(circle at 5% 0%, rgba(14, 165, 233, 0.14), transparent 35%),
+		radial-gradient(circle at 95% 5%, rgba(16, 185, 129, 0.12), transparent 35%),
+		linear-gradient(165deg, #f8fbff 0%, #eef4ff 50%, #f4fff8 100%);
+	--log-text: #0f172a;
+	--log-muted: #475569;
+	--log-card-bg: rgba(255, 255, 255, 0.84);
+	--log-card-border: rgba(15, 23, 42, 0.12);
+	--log-soft-bg: #f1f5f9;
+	--log-soft-hover: #e2e8f0;
+	--log-input-bg: #ffffff;
+	--log-input-text: #0f172a;
+	--log-button-secondary-bg: #ffffff;
+	--log-button-secondary-text: #334155;
+	--log-feedback: #047857;
+	--log-metric-bg: rgba(255, 255, 255, 0.82);
+	--log-metric-border: rgba(14, 116, 144, 0.28);
+	--log-metric-label: #1e3a8a;
+	--log-metric-value: #0f172a;
+	--log-live-bg: rgba(219, 234, 254, 0.8);
+	--log-live-border: rgba(59, 130, 246, 0.35);
+	--log-live-text: #1d4ed8;
+	--log-live-active-bg: rgba(16, 185, 129, 0.18);
+	--log-live-active-border: rgba(16, 185, 129, 0.45);
+	--log-live-active-text: #047857;
+	--log-manual-bg: rgba(255, 255, 255, 0.92);
+	--log-manual-border: rgba(15, 23, 42, 0.2);
+	--log-manual-text: #0f172a;
+}
+
+:host-context(.dark) {
+	--log-bg:
+		radial-gradient(circle at 5% 0%, rgba(14, 165, 233, 0.2), transparent 35%),
+		radial-gradient(circle at 95% 5%, rgba(16, 185, 129, 0.16), transparent 35%),
+		linear-gradient(165deg, #081325 0%, #111827 50%, #10231f 100%);
+	--log-text: #e2e8f0;
+	--log-muted: #94a3b8;
+	--log-card-bg: rgba(15, 23, 42, 0.8);
+	--log-card-border: rgba(148, 163, 184, 0.2);
+	--log-soft-bg: rgba(30, 41, 59, 0.78);
+	--log-soft-hover: rgba(51, 65, 85, 0.9);
+	--log-input-bg: rgba(15, 23, 42, 0.9);
+	--log-input-text: #e2e8f0;
+	--log-button-secondary-bg: rgba(15, 23, 42, 0.8);
+	--log-button-secondary-text: #cbd5e1;
+	--log-feedback: #34d399;
+	--log-metric-bg: rgba(15, 23, 42, 0.82);
+	--log-metric-border: rgba(45, 212, 191, 0.28);
+	--log-metric-label: #67e8f9;
+	--log-metric-value: #f8fafc;
+	--log-live-bg: rgba(15, 23, 42, 0.85);
+	--log-live-border: rgba(59, 130, 246, 0.4);
+	--log-live-text: #93c5fd;
+	--log-live-active-bg: rgba(16, 185, 129, 0.2);
+	--log-live-active-border: rgba(16, 185, 129, 0.45);
+	--log-live-active-text: #34d399;
+	--log-manual-bg: rgba(15, 23, 42, 0.9);
+	--log-manual-border: rgba(148, 163, 184, 0.35);
+	--log-manual-text: #e2e8f0;
+}
+
+.logbook-shell {
+	background: var(--log-bg);
+	color: var(--log-text);
+	border-radius: 1rem;
+}
+
+.logbook-shell .bg-white,
+.logbook-shell .dark\:bg-slate-900 {
+	background: var(--log-card-bg) !important;
+}
+
+.logbook-shell .bg-slate-50,
+.logbook-shell .bg-slate-100,
+.logbook-shell .dark\:bg-slate-800,
+.logbook-shell .dark\:bg-slate-800\/50,
+.logbook-shell .dark\:hover\:bg-slate-800,
+.logbook-shell .hover\:bg-slate-50 {
+	background: var(--log-soft-bg) !important;
+}
+
+.logbook-shell .hover\:bg-slate-50:hover,
+.logbook-shell .dark\:hover\:bg-slate-800:hover {
+	background: var(--log-soft-hover) !important;
+}
+
+.logbook-shell .border-slate-200,
+.logbook-shell .border-slate-300,
+.logbook-shell .dark\:border-slate-700,
+.logbook-shell .dark\:border-slate-800 {
+	border-color: var(--log-card-border) !important;
+}
+
+.logbook-shell .text-slate-500,
+.logbook-shell .text-slate-600,
+.logbook-shell .text-slate-700,
+.logbook-shell .dark\:text-slate-500,
+.logbook-shell .dark\:text-slate-400,
+.logbook-shell .dark\:text-slate-300 {
+	color: var(--log-muted) !important;
+}
+
+.logbook-shell input,
+.logbook-shell select,
+.logbook-shell textarea {
+	background: var(--log-input-bg) !important;
+	color: var(--log-input-text) !important;
+}
+
+.logbook-shell button.border {
+	background: var(--log-button-secondary-bg);
+	color: var(--log-button-secondary-text) !important;
+}
+
+.logbook-shell .form-feedback {
+	color: var(--log-feedback);
+	font-size: 0.9rem;
+}
+
+.logbook-shell .live-strip {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.logbook-shell .live-pill,
+.logbook-shell .manual-refresh {
+	border-radius: 999px;
+	padding: 0.45rem 0.85rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	transition: all 0.2s ease;
+}
+
+.logbook-shell .live-pill {
+	background: var(--log-live-bg);
+	border: 1px solid var(--log-live-border);
+	color: var(--log-live-text);
+}
+
+.logbook-shell .live-pill.active {
+	background: var(--log-live-active-bg);
+	border-color: var(--log-live-active-border);
+	color: var(--log-live-active-text);
+}
+
+.logbook-shell .live-pill .dot {
+	width: 0.45rem;
+	height: 0.45rem;
+	border-radius: 999px;
+	background: currentColor;
+	box-shadow: 0 0 10px currentColor;
+}
+
+.logbook-shell .manual-refresh {
+	background: var(--log-manual-bg);
+	border: 1px solid var(--log-manual-border);
+	color: var(--log-manual-text);
+}
+
+.logbook-shell .sync-caption {
+	font-size: 0.8rem;
+	color: var(--log-muted);
+}
+
+.logbook-shell .metric-card {
+	border: 1px solid var(--log-metric-border);
+	border-radius: 0.9rem;
+	background: var(--log-metric-bg);
+	padding: 0.8rem 0.95rem;
+	box-shadow: 0 8px 20px rgba(2, 6, 23, 0.12);
+}
+
+.logbook-shell .metric-card span {
+	display: block;
+	font-size: 0.75rem;
+	color: var(--log-metric-label);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.logbook-shell .metric-card strong {
+	display: block;
+	font-size: 1.05rem;
+	margin-top: 0.15rem;
+	color: var(--log-metric-value);
+}
+
+/* ── Chart cards ─────────────────────────────── */
+:host {
+	--chart-badge-bg: rgba(14, 116, 144, 0.12);
+	--chart-badge-text: #0369a1;
+}
+
+:host-context(.dark) {
+	--chart-badge-bg: rgba(56, 189, 248, 0.15);
+	--chart-badge-text: #38bdf8;
+}
+
+.logbook-shell .chart-card {
+	display: flex;
+	flex-direction: column;
+}
+
+.logbook-shell .chart-canvas-wrap {
+	position: relative;
+	flex: 1;
+	min-height: 220px;
+}
+
+.logbook-shell .chart-badge {
+	background: var(--chart-badge-bg);
+	color: var(--chart-badge-text);
+}

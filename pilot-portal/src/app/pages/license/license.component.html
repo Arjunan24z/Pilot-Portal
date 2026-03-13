@@ -1,365 +1,288 @@
-<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-6">
-
-    <!-- HEADER -->
-    <div class="space-y-1">
-      <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
-        {{ licenseType }} License
-      </h3>
-  
-      <p class="text-sm text-slate-600 dark:text-slate-400">
+<div class="license-shell rounded-2xl p-6 md:p-8 space-y-6">
+  <div class="license-grid">
+    <section class="intel-card">
+      <p class="eyebrow">License Matrix</p>
+      <h3>{{ licenseType }} Credential Control</h3>
+      <p class="muted">
         {{
-          licenseType === 'CPL'
-            ? 'Required for commercial flight operations.'
-            : licenseType === 'PPL'
-            ? 'Required for private, non-commercial flying.'
-            : licenseType === 'SPL'
-            ? 'Issued to student pilots during training.'
-            : 'Advanced / airline-level pilot license.'
+          licenseType === "CPL"
+            ? "Commercial operations credential set with strict renewal discipline."
+            : licenseType === "PPL"
+              ? "Private pilot qualification with ratings and endorsement tracking."
+              : licenseType === "SPL"
+                ? "Student training credential progression and training authorization."
+                : "Airline-level credential monitoring for advanced operations."
         }}
       </p>
-    </div>
-  
-    <!-- LOADING -->
-    <p *ngIf="loading" class="text-slate-600 dark:text-slate-400 text-sm">
-      Loading license information…
-    </p>
-  
-    <!-- NO LICENSE -->
-    <div
-      *ngIf="!loading && !license && !showForm"
-      class="bg-yellow-50 dark:bg-slate-800/40 border border-yellow-200 dark:border-slate-700 rounded-lg p-5 space-y-3"
-    >
-      <p class="text-yellow-700 dark:text-yellow-400 font-medium">
-        ⚠️ No {{ licenseType }} license on record
-      </p>
-  
-      <p class="text-slate-700 dark:text-slate-400 text-sm">
-        Upload your {{ licenseType }} license to track validity and compliance.
-      </p>
-  
-      <button
-        (click)="openForm()"
-        class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-medium text-white"
-      >
-        Upload License
-      </button>
-    </div>
-  
-    <!-- EXISTING LICENSE -->
-    <div *ngIf="!loading && license && !showForm" class="space-y-4">
-  
-      <!-- DOCUMENT -->
-      <div *ngIf="license.documentUrl" class="space-y-2">
-        <button
-          (click)="showPreview = !showPreview"
-          class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium"
-        >
-          📄 {{ showPreview ? 'Hide' : 'View' }} License Document
-          <span class="text-slate-500 dark:text-slate-500 text-xs">
-            ({{ license.documentName }})
-          </span>
-        </button>
-  
-        <div
-          *ngIf="showPreview"
-          class="relative bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden"
-        >
-          <button
-            (click)="showPreview = false"
-            class="absolute top-2 right-2 bg-slate-100 dark:bg-slate-900/80 hover:bg-slate-200 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-2 py-1 rounded text-xs z-10"
-          >
-            ✕ Close
-          </button>
-  
-          <iframe
-            [src]="safePdfUrl"
-            class="w-full h-[520px] bg-white dark:bg-slate-900"
-          ></iframe>
-        </div>
-      </div>
-  
-      <!-- DETAILS -->
-      <div class="grid grid-cols-2 gap-y-3 text-sm">
-  
-        <div class="text-slate-600 dark:text-slate-400">License Number</div>
-        <div class="text-slate-900 dark:text-slate-200">{{ license.licenseNumber }}</div>
-  
-        <div class="text-slate-600 dark:text-slate-400">Issue Date</div>
-        <div class="text-slate-900 dark:text-slate-200">{{ license.issueDate | date }}</div>
-  
-        <div class="text-slate-600 dark:text-slate-400">Expiry Date</div>
-        <div class="text-slate-900 dark:text-slate-200">{{ license.expiryDate | date }}</div>
-  
-        <div class="text-slate-600 dark:text-slate-400">Status</div>
-        <div>
-          <span
-            class="px-2 py-1 text-xs rounded font-medium"
+
+      <div class="stat-row" *ngIf="license; else emptyState">
+        <div class="stat-chip">
+          <span>Status</span>
+          <strong
             [ngClass]="{
-              'bg-green-100 dark:bg-green-700/40 text-green-700 dark:text-green-300': status === 'Valid',
-              'bg-yellow-100 dark:bg-yellow-700/40 text-yellow-700 dark:text-yellow-300': status === 'Expiring Soon',
-              'bg-red-100 dark:bg-red-700/40 text-red-700 dark:text-red-300': status === 'Expired'
+              'text-emerald-400': status === 'Valid',
+              'text-amber-400': status === 'Expiring Soon',
+              'text-rose-400': status === 'Expired',
             }"
+            >{{ status }}</strong
           >
-            {{ status }}
-          </span>
         </div>
-
-        <!-- Restrictions -->
-        <div *ngIf="license.restrictions" class="text-slate-600 dark:text-slate-400">Restrictions</div>
-        <div *ngIf="license.restrictions" class="text-red-600 dark:text-red-400 font-medium">
-          ⚠️ {{ license.restrictions }}
+        <div class="stat-chip">
+          <span>Days Remaining</span>
+          <strong>{{ daysToExpiry !== null ? daysToExpiry : "N/A" }}</strong>
+        </div>
+        <div class="stat-chip">
+          <span>Compliance Score</span>
+          <strong>{{ complianceScore }}%</strong>
+        </div>
+        <div class="stat-chip">
+          <span>Ratings</span>
+          <strong>{{ ratingsCount }}</strong>
+        </div>
+        <div class="stat-chip">
+          <span>Endorsements</span>
+          <strong>{{ endorsementsCount }}</strong>
         </div>
       </div>
 
-      <!-- Ratings Section -->
-      <div *ngIf="license.ratings && license.ratings.length > 0" class="space-y-2">
-        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Ratings</h4>
-        <div class="flex flex-wrap gap-2">
-          <span
-            *ngFor="let rating of license.ratings"
-            class="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium"
-          >
-            ✓ {{ rating }}
-          </span>
+      <ng-template #emptyState>
+        <div class="stat-chip empty">
+          No {{ licenseType }} credential uploaded yet
         </div>
+      </ng-template>
+
+      <div class="action-hint">
+        <span>Renewal Planner</span>
+        <p>{{ renewalAction }}</p>
       </div>
 
-      <!-- Endorsements Section -->
-      <div *ngIf="license.endorsements && license.endorsements.length > 0" class="space-y-2">
-        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Endorsements</h4>
-        <div class="space-y-2">
-          <div
-            *ngFor="let endorsement of license.endorsements"
-            class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg p-3"
-          >
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <div class="font-medium text-slate-900 dark:text-slate-100 text-sm">
-                  {{ endorsement.endorsementType }}
-                </div>
-                <div class="text-xs text-slate-600 dark:text-slate-400 mt-1 space-y-0.5">
-                  <div *ngIf="endorsement.instructorName">
-                    Instructor: {{ endorsement.instructorName }}
-                    <span *ngIf="endorsement.instructorCertificate">({{ endorsement.instructorCertificate }})</span>
-                  </div>
-                  <div *ngIf="endorsement.date">Date: {{ endorsement.date | date }}</div>
-                  <div *ngIf="endorsement.aircraftType">Aircraft: {{ endorsement.aircraftType }}</div>
-                  <div *ngIf="endorsement.remarks" class="italic">{{ endorsement.remarks }}</div>
-                </div>
-              </div>
-              <button
-                (click)="removeEndorsement(endorsement._id!)"
-                class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs ml-2"
-                title="Remove endorsement"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex flex-wrap gap-2 pt-2">
-        <button
-          (click)="openForm()"
-          class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-medium text-white"
-        >
-          Renew / Update License
+      <div class="button-row">
+        <button class="primary-btn" (click)="openForm()">
+          {{ license ? "Renew / Update" : "Upload License" }}
         </button>
         <button
-          (click)="openEndorsementForm()"
-          class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm font-medium text-white"
+          class="ghost-btn"
+          *ngIf="license?.documentUrl"
+          (click)="showPreview = !showPreview"
         >
+          {{ showPreview ? "Hide Document" : "Preview Document" }}
+        </button>
+      </div>
+    </section>
+
+    <section class="data-card" *ngIf="!loading && license && !showForm">
+      <h4>Credential Snapshot</h4>
+
+      <div class="detail-grid">
+        <div>
+          <label>License Number</label>
+          <p>{{ license.licenseNumber || "N/A" }}</p>
+        </div>
+        <div>
+          <label>Issue Date</label>
+          <p>{{ license.issueDate | date }}</p>
+        </div>
+        <div>
+          <label>Expiry Date</label>
+          <p>{{ license.expiryDate | date }}</p>
+        </div>
+        <div *ngIf="license.restrictions">
+          <label>Restrictions</label>
+          <p class="danger-text">{{ license.restrictions }}</p>
+        </div>
+      </div>
+
+      <div
+        class="tag-wrap"
+        *ngIf="license.ratings && license.ratings.length > 0"
+      >
+        <h5>Ratings</h5>
+        <div class="tags">
+          <span *ngFor="let rating of license.ratings">{{ rating }}</span>
+        </div>
+      </div>
+
+      <div
+        class="tag-wrap"
+        *ngIf="license.endorsements && license.endorsements.length > 0"
+      >
+        <h5>Endorsements</h5>
+        <div
+          class="endorsement-item"
+          *ngFor="let endorsement of license.endorsements"
+        >
+          <div>
+            <strong>{{ endorsement.endorsementType }}</strong>
+            <p>
+              <span *ngIf="endorsement.instructorName"
+                >{{ endorsement.instructorName }}
+              </span>
+              <span *ngIf="endorsement.date"
+                >• {{ endorsement.date | date }}</span
+              >
+              <span *ngIf="endorsement.aircraftType"
+                >• {{ endorsement.aircraftType }}</span
+              >
+            </p>
+          </div>
+          <button
+            class="remove-btn"
+            (click)="removeEndorsement(endorsement._id!)"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+
+      <div class="button-row mt-3">
+        <button class="primary-btn accent" (click)="openEndorsementForm()">
           + Add Endorsement
         </button>
-        <button
-          (click)="openRatingForm()"
-          class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded text-sm font-medium text-white"
-        >
+        <button class="primary-btn violet" (click)="openRatingForm()">
           + Add Rating
         </button>
       </div>
-    </div>
+    </section>
+  </div>
 
-    <!-- Endorsement Form -->
-    <div
-      *ngIf="showEndorsementForm"
-      class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg p-5 space-y-4"
+  <p *ngIf="loading" class="loading-note text-sm">
+    Loading license information...
+  </p>
+
+  <div *ngIf="!loading && !license && !showForm" class="empty-panel">
+    <p>No {{ licenseType }} license found.</p>
+    <span
+      >Upload the credential to enable compliance scoring and renewal
+      planning.</span
     >
-      <h4 class="font-semibold text-slate-900 dark:text-slate-100">Add New Endorsement</h4>
+  </div>
 
+  <section *ngIf="showEndorsementForm" class="form-card">
+    <h4>Add Endorsement</h4>
+    <div class="form-grid">
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Endorsement Type *</label>
-        <select
-          [(ngModel)]="endorsementForm.endorsementType"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        >
+        <label>Endorsement Type *</label>
+        <select [(ngModel)]="endorsementForm.endorsementType">
           <option value="">Select endorsement type</option>
-          <option *ngFor="let type of availableEndorsements" [value]="type">{{ type }}</option>
+          <option *ngFor="let type of availableEndorsements" [value]="type">
+            {{ type }}
+          </option>
         </select>
       </div>
-
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Instructor Name</label>
-        <input
-          type="text"
-          [(ngModel)]="endorsementForm.instructorName"
-          placeholder="e.g., John Smith, CFI"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        />
+        <label>Instructor Name</label
+        ><input type="text" [(ngModel)]="endorsementForm.instructorName" />
       </div>
-
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Instructor Certificate Number</label>
-        <input
+        <label>Instructor Certificate</label
+        ><input
           type="text"
           [(ngModel)]="endorsementForm.instructorCertificate"
-          placeholder="e.g., CFI-123456"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
         />
       </div>
-
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Date</label>
-        <input
-          type="date"
-          [(ngModel)]="endorsementForm.date"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        />
+        <label>Date</label
+        ><input type="date" [(ngModel)]="endorsementForm.date" />
       </div>
-
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Aircraft Type</label>
-        <input
-          type="text"
-          [(ngModel)]="endorsementForm.aircraftType"
-          placeholder="e.g., Cessna 182"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        />
+        <label>Aircraft Type</label
+        ><input type="text" [(ngModel)]="endorsementForm.aircraftType" />
       </div>
-
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Remarks</label>
-        <textarea
-          [(ngModel)]="endorsementForm.remarks"
-          rows="2"
-          placeholder="Additional notes..."
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        ></textarea>
-      </div>
-
-      <div class="flex gap-3">
-        <button
-          (click)="saveEndorsement()"
-          class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm font-medium text-white"
-        >
-          Save Endorsement
-        </button>
-        <button
-          (click)="showEndorsementForm = false"
-          class="border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 px-4 py-2 rounded text-sm text-slate-700 dark:text-slate-300"
-        >
-          Cancel
-        </button>
+        <label>Remarks</label
+        ><textarea rows="2" [(ngModel)]="endorsementForm.remarks"></textarea>
       </div>
     </div>
 
-    <!-- Rating Form -->
-    <div
-      *ngIf="showRatingForm"
-      class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg p-5 space-y-4"
-    >
-      <h4 class="font-semibold text-slate-900 dark:text-slate-100">Add New Rating</h4>
+    <div class="button-row">
+      <button class="primary-btn accent" (click)="saveEndorsement()">
+        Save Endorsement
+      </button>
+      <button class="ghost-btn" (click)="showEndorsementForm = false">
+        Cancel
+      </button>
+    </div>
+  </section>
 
+  <section *ngIf="showRatingForm" class="form-card">
+    <h4>Add Rating</h4>
+    <div class="form-grid single">
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Select Rating *</label>
-        <select
-          [(ngModel)]="newRating"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        >
+        <label>Rating *</label>
+        <select [(ngModel)]="newRating">
           <option value="">Choose a rating</option>
-          <option *ngFor="let rating of availableRatings" [value]="rating">{{ rating }}</option>
+          <option *ngFor="let rating of availableRatings" [value]="rating">
+            {{ rating }}
+          </option>
         </select>
       </div>
-
-      <div class="flex gap-3">
-        <button
-          (click)="saveRating()"
-          class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded text-sm font-medium text-white"
-        >
-          Save Rating
-        </button>
-        <button
-          (click)="showRatingForm = false"
-          class="border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 px-4 py-2 rounded text-sm text-slate-700 dark:text-slate-300"
-        >
-          Cancel
-        </button>
-      </div>
     </div>
-  
-    <!-- FORM -->
-    <div
-      *ngIf="showForm"
-      class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg p-5 space-y-4"
-    >
-  
+    <div class="button-row">
+      <button class="primary-btn violet" (click)="saveRating()">
+        Save Rating
+      </button>
+      <button class="ghost-btn" (click)="showRatingForm = false">Cancel</button>
+    </div>
+  </section>
+
+  <section *ngIf="showForm" class="form-card">
+    <h4>{{ license ? "Update License" : "Create License" }}</h4>
+    <div class="form-grid">
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">License Number</label>
+        <label>License Number</label>
+        <input type="text" [(ngModel)]="form.licenseNumber" />
+      </div>
+      <div>
+        <label>Issue Date</label>
+        <input type="date" [(ngModel)]="form.issueDate" />
+      </div>
+      <div>
+        <label>Expiry Date</label>
+        <input type="date" [(ngModel)]="form.expiryDate" />
+      </div>
+      <div>
+        <label>Restrictions</label>
         <input
           type="text"
-          [(ngModel)]="form.licenseNumber"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
+          [(ngModel)]="form.restrictions"
+          placeholder="Operational restrictions if any"
         />
       </div>
-  
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Issue Date</label>
-        <input
-          type="date"
-          [(ngModel)]="form.issueDate"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        />
+        <label>Remarks</label>
+        <textarea rows="2" [(ngModel)]="form.remarks"></textarea>
       </div>
-  
       <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">Expiry Date</label>
-        <input
-          type="date"
-          [(ngModel)]="form.expiryDate"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-        />
-      </div>
-  
-      <div>
-        <label class="text-sm text-slate-700 dark:text-slate-300">License Document (PDF)</label>
+        <label>License Document (PDF)</label>
         <input
           type="file"
           accept="application/pdf"
           (change)="onFileSelect($event)"
-          class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-sm text-slate-700 dark:text-slate-300"
         />
       </div>
-  
-      <div class="flex gap-3 pt-2">
-        <button
-          (click)="save()"
-          class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm font-medium text-white"
-        >
-          Save
-        </button>
-  
-        <button
-          (click)="showForm = false"
-          class="border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 px-4 py-2 rounded text-sm text-slate-700 dark:text-slate-300"
-        >
-          Cancel
-        </button>
-      </div>
-  
-      <p class="text-green-400 text-sm">{{ message }}</p>
     </div>
-  
-  </div>
-  
+
+    <div class="button-row">
+      <button class="primary-btn" (click)="save()" [disabled]="isSaving">
+        {{ isSaving ? "Saving..." : "Save License" }}
+      </button>
+      <button
+        class="ghost-btn"
+        (click)="showForm = false"
+        [disabled]="isSaving"
+      >
+        Cancel
+      </button>
+    </div>
+  </section>
+
+  <section *ngIf="showPreview && license?.documentUrl" class="preview-card">
+    <div class="preview-head">
+      <h4>License Document Viewer</h4>
+      <button class="ghost-btn" (click)="showPreview = false">Close</button>
+    </div>
+    <iframe [src]="safePdfUrl" class="w-full h-[520px]"></iframe>
+  </section>
+
+  <p *ngIf="message" class="feedback">{{ message }}</p>
+</div>

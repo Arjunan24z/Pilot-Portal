@@ -1,0 +1,77 @@
+:host {
+	--dash-bg:
+		radial-gradient(circle at 12% 5%, rgba(56, 189, 248, 0.14), transparent 35%),
+		radial-gradient(circle at 88% 0%, rgba(74, 222, 128, 0.12), transparent 30%),
+		linear-gradient(160deg, #f8fbff 0%, #eef5ff 45%, #eefdf5 100%);
+	--dash-text: #0f172a;
+	--dash-muted: #475569;
+	--dash-card-bg: rgba(255, 255, 255, 0.82);
+	--dash-card-border: rgba(15, 23, 42, 0.12);
+	--dash-card-hover: rgba(255, 255, 255, 0.92);
+	--dash-soft-surface: #eef2ff;
+	--dash-soft-text: #334155;
+	--dash-table-border: rgba(148, 163, 184, 0.35);
+}
+
+:host-context(.dark) {
+	--dash-bg:
+		radial-gradient(circle at 12% 5%, rgba(56, 189, 248, 0.18), transparent 35%),
+		radial-gradient(circle at 88% 0%, rgba(74, 222, 128, 0.16), transparent 30%),
+		linear-gradient(160deg, #071224 0%, #111c35 45%, #102b2a 100%);
+	--dash-text: #e2e8f0;
+	--dash-muted: #94a3b8;
+	--dash-card-bg: rgba(15, 23, 42, 0.72);
+	--dash-card-border: rgba(148, 163, 184, 0.24);
+	--dash-card-hover: rgba(15, 23, 42, 0.84);
+	--dash-soft-surface: rgba(30, 41, 59, 0.65);
+	--dash-soft-text: #cbd5e1;
+	--dash-table-border: rgba(71, 85, 105, 0.6);
+}
+
+.dashboard-shell {
+	background: var(--dash-bg);
+	color: var(--dash-text);
+	border-radius: 1rem;
+	padding: 1.25rem;
+}
+
+.dashboard-shell .glass {
+	background: var(--dash-card-bg);
+	border-color: var(--dash-card-border) !important;
+}
+
+.dashboard-shell .card-hover:hover {
+	background: var(--dash-card-hover);
+}
+
+.dashboard-shell :is(p, th, td, span, h3) {
+	color: inherit;
+}
+
+.dashboard-shell .text-slate-500,
+.dashboard-shell .text-slate-600,
+.dashboard-shell .text-slate-700,
+.dashboard-shell .text-slate-400,
+.dashboard-shell .dark\:text-slate-400,
+.dashboard-shell .dark\:text-slate-300,
+.dashboard-shell .dark\:text-gray-400 {
+	color: var(--dash-muted) !important;
+}
+
+.dashboard-shell .bg-slate-50,
+.dashboard-shell .dark\:bg-slate-800\/50,
+.dashboard-shell .dark\:bg-slate-800\/60,
+.dashboard-shell .dark\:hover\:bg-slate-800\/50,
+.dashboard-shell .hover\:bg-white\/50 {
+	background: var(--dash-soft-surface) !important;
+}
+
+.dashboard-shell .border-slate-200\/50,
+.dashboard-shell .border-slate-200\/30,
+.dashboard-shell .dark\:border-slate-700\/50,
+.dashboard-shell .dark\:border-slate-700\/30,
+.dashboard-shell .border-slate-200,
+.dashboard-shell .dark\:border-gray-700,
+.dashboard-shell .dark\:border-gray-800 {
+	border-color: var(--dash-table-border) !important;
+}

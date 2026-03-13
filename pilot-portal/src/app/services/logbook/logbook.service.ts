@@ -32,7 +32,7 @@ export interface LogEntry {
   nightLandings?: number;
   
   // Metadata
-  flightType?: 'training' | 'solo' | 'personal' | 'commercial' | 'checkride';
+  flightType?: 'training' | 'solo' | 'personal' | 'commercial' | 'checkride' | 'Training' | 'Solo' | 'Personal' | 'Commercial' | 'Other';
   instructorName?: string;
   remarks?: string;
 }

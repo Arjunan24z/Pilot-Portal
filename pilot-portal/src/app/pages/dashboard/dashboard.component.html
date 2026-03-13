@@ -1,18 +1,17 @@
-<div class="min-h-screen text-slate-900 dark:text-slate-100 space-y-8">
-
+<div class="dashboard-shell min-h-screen space-y-8">
   <!-- FLIGHT STATUS BANNER -->
   <div
     class="rounded-2xl p-6 flex items-center justify-between premium-card shadow-2xl"
     [ngClass]="{
       'bg-gradient-to-r from-green-500 to-emerald-600 text-white': flightReady,
-      'bg-gradient-to-r from-red-500 to-rose-600 text-white': !flightReady
+      'bg-gradient-to-r from-red-500 to-rose-600 text-white': !flightReady,
     }"
   >
     <div class="flex items-center space-x-5">
       <div
         class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl backdrop-blur-sm shadow-lg"
         [ngClass]="{
-          'bg-white/20': flightReady || !flightReady
+          'bg-white/20': flightReady || !flightReady,
         }"
       >
         ✈️
@@ -20,12 +19,14 @@
 
       <div>
         <p class="text-2xl font-bold mb-1">
-          {{ flightReady ? 'Flight Ready' : 'Not Flight Ready' }}
+          {{ flightReady ? "Flight Ready" : "Not Flight Ready" }}
         </p>
         <p class="text-sm opacity-90">
-          {{ flightReady
-            ? 'All required documents and medicals are valid'
-            : 'One or more required items are expired' }}
+          {{
+            flightReady
+              ? "All required documents and medicals are valid"
+              : "One or more required items are expired"
+          }}
         </p>
       </div>
     </div>
@@ -33,66 +34,144 @@
 
   <!-- PILOT SUMMARY -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-
     <!-- PROFILE -->
-    <div class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in">
+    <div
+      class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in"
+    >
       <div class="flex items-center space-x-3 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-white"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+              clip-rule="evenodd"
+            />
           </svg>
         </div>
-        <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide">Pilot</p>
+        <p
+          class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide"
+        >
+          Pilot
+        </p>
       </div>
-      <p class="text-2xl text-slate-900 dark:text-white font-bold mb-1">{{ profileSummary.name }}</p>
-      <p class="text-sm text-slate-600 dark:text-slate-400">{{ profileSummary.email }}</p>
-    </div>
-
-    <!-- TOTAL HOURS -->
-    <div class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in" style="animation-delay: 0.1s">
-      <div class="flex items-center space-x-3 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide">Total Hours</p>
-      </div>
-      <p class="text-4xl text-slate-900 dark:text-white font-black gradient-text">{{ totalHours | number:'1.1-1' }}</p>
-    </div>
-
-    <!-- TOTAL FLIGHTS -->
-    <div class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in" style="animation-delay: 0.2s">
-      <div class="flex items-center space-x-3 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
-          </svg>
-        </div>
-        <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide">Total Flights</p>
-      </div>
-      <p class="text-4xl text-slate-900 dark:text-white font-black gradient-text">{{ totalFlights }}</p>
-    </div>
-
-    <!-- LAST FLIGHT -->
-    <div class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in" style="animation-delay: 0.3s">
-      <div class="flex items-center space-x-3 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-          </svg>
-        </div>
-        <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide">Last Flight</p>
-      </div>
-      <p class="text-xl text-slate-900 dark:text-white font-bold">
-        {{ lastFlightDate ? (lastFlightDate | date:'mediumDate') : '—' }}
+      <p class="text-2xl text-slate-900 dark:text-white font-bold mb-1">
+        {{ profileSummary.name }}
+      </p>
+      <p class="text-sm text-slate-600 dark:text-slate-400">
+        {{ profileSummary.email }}
       </p>
     </div>
 
+    <!-- TOTAL HOURS -->
+    <div
+      class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in"
+      style="animation-delay: 0.1s"
+    >
+      <div class="flex items-center space-x-3 mb-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-white"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <p
+          class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide"
+        >
+          Total Hours
+        </p>
+      </div>
+      <p
+        class="text-4xl text-slate-900 dark:text-white font-black gradient-text"
+      >
+        {{ totalHours | number: "1.1-1" }}
+      </p>
+    </div>
+
+    <!-- TOTAL FLIGHTS -->
+    <div
+      class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in"
+      style="animation-delay: 0.2s"
+    >
+      <div class="flex items-center space-x-3 mb-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-white"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"
+            />
+          </svg>
+        </div>
+        <p
+          class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide"
+        >
+          Total Flights
+        </p>
+      </div>
+      <p
+        class="text-4xl text-slate-900 dark:text-white font-black gradient-text"
+      >
+        {{ totalFlights }}
+      </p>
+    </div>
+
+    <!-- LAST FLIGHT -->
+    <div
+      class="glass rounded-2xl shadow-xl p-6 card-hover border border-white/20 animate-bounce-in"
+      style="animation-delay: 0.3s"
+    >
+      <div class="flex items-center space-x-3 mb-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-white"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <p
+          class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wide"
+        >
+          Last Flight
+        </p>
+      </div>
+      <p class="text-xl text-slate-900 dark:text-white font-bold">
+        {{ lastFlightDate ? (lastFlightDate | date: "mediumDate") : "—" }}
+      </p>
+    </div>
   </div>
 
   <!-- CURRENCY STATUS (NEW!) -->
-  <div *ngIf="currencyStatus" class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover">
+  <div
+    *ngIf="currencyStatus"
+    class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover"
+  >
     <h3 class="text-xl font-bold mb-6 flex items-center space-x-3">
       <span class="text-2xl">📋</span>
       <span>Currency Status</span>
@@ -100,106 +179,174 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Passenger Currency -->
-      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
-           [ngClass]="{
-             'border-green-500': currencyStatus.passengerCurrency?.status === 'CURRENT',
-             'border-red-500': currencyStatus.passengerCurrency?.status === 'EXPIRED'
-           }">
+      <div
+        class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+        [ngClass]="{
+          'border-green-500':
+            currencyStatus.passengerCurrency?.status === 'CURRENT',
+          'border-red-500':
+            currencyStatus.passengerCurrency?.status === 'EXPIRED',
+        }"
+      >
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Passenger Currency</span>
-          <span class="text-lg"
-                [ngClass]="{
-                  'text-green-500': currencyStatus.passengerCurrency?.status === 'CURRENT',
-                  'text-red-500': currencyStatus.passengerCurrency?.status === 'EXPIRED'
-                }">
-            {{ currencyStatus.passengerCurrency?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300"
+            >Passenger Currency</span
+          >
+          <span
+            class="text-lg"
+            [ngClass]="{
+              'text-green-500':
+                currencyStatus.passengerCurrency?.status === 'CURRENT',
+              'text-red-500':
+                currencyStatus.passengerCurrency?.status === 'EXPIRED',
+            }"
+          >
+            {{
+              currencyStatus.passengerCurrency?.status === "CURRENT"
+                ? "🟢"
+                : "🔴"
+            }}
           </span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
           {{ currencyStatus.passengerCurrency?.message }}
         </p>
-        <p *ngIf="currencyStatus.passengerCurrency?.daysRemaining > 0" class="text-sm font-bold"
-           [ngClass]="{
-             'text-green-600 dark:text-green-400': currencyStatus.passengerCurrency?.daysRemaining > 30,
-             'text-yellow-600 dark:text-yellow-400': currencyStatus.passengerCurrency?.daysRemaining <= 30 && currencyStatus.passengerCurrency?.daysRemaining > 7,
-             'text-red-600 dark:text-red-400': currencyStatus.passengerCurrency?.daysRemaining <= 7
-           }">
+        <p
+          *ngIf="currencyStatus.passengerCurrency?.daysRemaining > 0"
+          class="text-sm font-bold"
+          [ngClass]="{
+            'text-green-600 dark:text-green-400':
+              currencyStatus.passengerCurrency?.daysRemaining > 30,
+            'text-yellow-600 dark:text-yellow-400':
+              currencyStatus.passengerCurrency?.daysRemaining <= 30 &&
+              currencyStatus.passengerCurrency?.daysRemaining > 7,
+            'text-red-600 dark:text-red-400':
+              currencyStatus.passengerCurrency?.daysRemaining <= 7,
+          }"
+        >
           {{ currencyStatus.passengerCurrency?.daysRemaining }} days remaining
         </p>
       </div>
 
       <!-- Night Currency -->
-      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
-           [ngClass]="{
-             'border-green-500': currencyStatus.nightCurrency?.status === 'CURRENT',
-             'border-red-500': currencyStatus.nightCurrency?.status === 'EXPIRED'
-           }">
+      <div
+        class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+        [ngClass]="{
+          'border-green-500':
+            currencyStatus.nightCurrency?.status === 'CURRENT',
+          'border-red-500': currencyStatus.nightCurrency?.status === 'EXPIRED',
+        }"
+      >
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Night Currency</span>
-          <span class="text-lg"
-                [ngClass]="{
-                  'text-green-500': currencyStatus.nightCurrency?.status === 'CURRENT',
-                  'text-red-500': currencyStatus.nightCurrency?.status === 'EXPIRED'
-                }">
-            {{ currencyStatus.nightCurrency?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300"
+            >Night Currency</span
+          >
+          <span
+            class="text-lg"
+            [ngClass]="{
+              'text-green-500':
+                currencyStatus.nightCurrency?.status === 'CURRENT',
+              'text-red-500':
+                currencyStatus.nightCurrency?.status === 'EXPIRED',
+            }"
+          >
+            {{
+              currencyStatus.nightCurrency?.status === "CURRENT" ? "🟢" : "🔴"
+            }}
           </span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
           {{ currencyStatus.nightCurrency?.message }}
         </p>
-        <p *ngIf="currencyStatus.nightCurrency?.daysRemaining > 0" class="text-sm font-bold"
-           [ngClass]="{
-             'text-green-600 dark:text-green-400': currencyStatus.nightCurrency?.daysRemaining > 30,
-             'text-yellow-600 dark:text-yellow-400': currencyStatus.nightCurrency?.daysRemaining <= 30 && currencyStatus.nightCurrency?.daysRemaining > 7,
-             'text-red-600 dark:text-red-400': currencyStatus.nightCurrency?.daysRemaining <= 7
-           }">
+        <p
+          *ngIf="currencyStatus.nightCurrency?.daysRemaining > 0"
+          class="text-sm font-bold"
+          [ngClass]="{
+            'text-green-600 dark:text-green-400':
+              currencyStatus.nightCurrency?.daysRemaining > 30,
+            'text-yellow-600 dark:text-yellow-400':
+              currencyStatus.nightCurrency?.daysRemaining <= 30 &&
+              currencyStatus.nightCurrency?.daysRemaining > 7,
+            'text-red-600 dark:text-red-400':
+              currencyStatus.nightCurrency?.daysRemaining <= 7,
+          }"
+        >
           {{ currencyStatus.nightCurrency?.daysRemaining }} days remaining
         </p>
       </div>
 
       <!-- Flight Review -->
-      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
-           [ngClass]="{
-             'border-green-500': currencyStatus.flightReview?.status === 'CURRENT',
-             'border-red-500': currencyStatus.flightReview?.status === 'EXPIRED'
-           }">
+      <div
+        class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+        [ngClass]="{
+          'border-green-500': currencyStatus.flightReview?.status === 'CURRENT',
+          'border-red-500': currencyStatus.flightReview?.status === 'EXPIRED',
+        }"
+      >
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Flight Review</span>
-          <span class="text-lg"
-                [ngClass]="{
-                  'text-green-500': currencyStatus.flightReview?.status === 'CURRENT',
-                  'text-red-500': currencyStatus.flightReview?.status === 'EXPIRED'
-                }">
-            {{ currencyStatus.flightReview?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300"
+            >Flight Review</span
+          >
+          <span
+            class="text-lg"
+            [ngClass]="{
+              'text-green-500':
+                currencyStatus.flightReview?.status === 'CURRENT',
+              'text-red-500': currencyStatus.flightReview?.status === 'EXPIRED',
+            }"
+          >
+            {{
+              currencyStatus.flightReview?.status === "CURRENT" ? "🟢" : "🔴"
+            }}
           </span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
           {{ currencyStatus.flightReview?.message }}
         </p>
-        <p *ngIf="currencyStatus.flightReview?.daysRemaining > 0" class="text-sm font-bold"
-           [ngClass]="{
-             'text-green-600 dark:text-green-400': currencyStatus.flightReview?.daysRemaining > 30,
-             'text-yellow-600 dark:text-yellow-400': currencyStatus.flightReview?.daysRemaining <= 30,
-             'text-red-600 dark:text-red-400': currencyStatus.flightReview?.daysRemaining <= 7
-           }">
+        <p
+          *ngIf="currencyStatus.flightReview?.daysRemaining > 0"
+          class="text-sm font-bold"
+          [ngClass]="{
+            'text-green-600 dark:text-green-400':
+              currencyStatus.flightReview?.daysRemaining > 30,
+            'text-yellow-600 dark:text-yellow-400':
+              currencyStatus.flightReview?.daysRemaining <= 30,
+            'text-red-600 dark:text-red-400':
+              currencyStatus.flightReview?.daysRemaining <= 7,
+          }"
+        >
           {{ currencyStatus.flightReview?.daysRemaining }} days remaining
         </p>
       </div>
 
       <!-- Instrument Currency -->
-      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
-           [ngClass]="{
-             'border-green-500': currencyStatus.instrumentCurrency?.status === 'CURRENT',
-             'border-red-500': currencyStatus.instrumentCurrency?.status === 'EXPIRED'
-           }">
+      <div
+        class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border"
+        [ngClass]="{
+          'border-green-500':
+            currencyStatus.instrumentCurrency?.status === 'CURRENT',
+          'border-red-500':
+            currencyStatus.instrumentCurrency?.status === 'EXPIRED',
+        }"
+      >
         <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">Instrument Currency</span>
-          <span class="text-lg"
-                [ngClass]="{
-                  'text-green-500': currencyStatus.instrumentCurrency?.status === 'CURRENT',
-                  'text-red-500': currencyStatus.instrumentCurrency?.status === 'EXPIRED'
-                }">
-            {{ currencyStatus.instrumentCurrency?.status === 'CURRENT' ? '🟢' : '🔴' }}
+          <span class="text-sm font-semibold text-slate-600 dark:text-slate-300"
+            >Instrument Currency</span
+          >
+          <span
+            class="text-lg"
+            [ngClass]="{
+              'text-green-500':
+                currencyStatus.instrumentCurrency?.status === 'CURRENT',
+              'text-red-500':
+                currencyStatus.instrumentCurrency?.status === 'EXPIRED',
+            }"
+          >
+            {{
+              currencyStatus.instrumentCurrency?.status === "CURRENT"
+                ? "🟢"
+                : "🔴"
+            }}
           </span>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400">
@@ -209,7 +356,10 @@
     </div>
 
     <!-- Next Expiring Alert -->
-    <div *ngIf="currencyStatus.nextExpiring" class="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-3">
+    <div
+      *ngIf="currencyStatus.nextExpiring"
+      class="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-3"
+    >
       <div class="flex items-center space-x-2">
         <span class="text-yellow-600 dark:text-yellow-400 text-lg">⚠️</span>
         <div>
@@ -225,7 +375,10 @@
   </div>
 
   <!-- FLIGHT HOURS BREAKDOWN (NEW!) -->
-  <div *ngIf="hoursBreakdown" class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover">
+  <div
+    *ngIf="hoursBreakdown"
+    class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover"
+  >
     <h3 class="text-xl font-bold mb-6 flex items-center space-x-3">
       <span class="text-2xl">📊</span>
       <span>Flight Hours Breakdown</span>
@@ -234,55 +387,96 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">PIC</p>
-        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ hoursBreakdown.pilotInCommand | number:'1.1-1' }}</p>
+        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+          {{ hoursBreakdown.pilotInCommand | number: "1.1-1" }}
+        </p>
       </div>
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Night</p>
-        <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ hoursBreakdown.nightTime | number:'1.1-1' }}</p>
+        <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+          {{ hoursBreakdown.nightTime | number: "1.1-1" }}
+        </p>
       </div>
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Cross Country</p>
-        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ hoursBreakdown.crossCountry | number:'1.1-1' }}</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">
+          Cross Country
+        </p>
+        <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          {{ hoursBreakdown.crossCountry | number: "1.1-1" }}
+        </p>
       </div>
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Instrument</p>
-        <p class="text-2xl font-bold text-pink-600 dark:text-pink-400">{{ hoursBreakdown.totalInstrument | number:'1.1-1' }}</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">
+          Instrument
+        </p>
+        <p class="text-2xl font-bold text-pink-600 dark:text-pink-400">
+          {{ hoursBreakdown.totalInstrument | number: "1.1-1" }}
+        </p>
       </div>
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Dual Received</p>
-        <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ hoursBreakdown.dualReceived | number:'1.1-1' }}</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">
+          Dual Received
+        </p>
+        <p class="text-2xl font-bold text-green-600 dark:text-green-400">
+          {{ hoursBreakdown.dualReceived | number: "1.1-1" }}
+        </p>
       </div>
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Solo</p>
-        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ hoursBreakdown.soloTime | number:'1.1-1' }}</p>
+        <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+          {{ hoursBreakdown.soloTime | number: "1.1-1" }}
+        </p>
       </div>
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Day Landings</p>
-        <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ hoursBreakdown.dayLandings }}</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">
+          Day Landings
+        </p>
+        <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">
+          {{ hoursBreakdown.dayLandings }}
+        </p>
       </div>
       <div class="text-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Night Landings</p>
-        <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ hoursBreakdown.nightLandings }}</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">
+          Night Landings
+        </p>
+        <p class="text-2xl font-bold text-red-600 dark:text-red-400">
+          {{ hoursBreakdown.nightLandings }}
+        </p>
       </div>
     </div>
   </div>
 
   <!-- COMPLIANCE TABLES -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
     <!-- MEDICALS -->
-    <div class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover">
+    <div
+      class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover"
+    >
       <div class="flex items-center space-x-3 mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg"
+        >
+          <svg
+            class="w-6 h-6 text-white"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+              clip-rule="evenodd"
+            />
           </svg>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Medical Certificates</h3>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+          Medical Certificates
+        </h3>
       </div>
 
       <table class="w-full text-sm">
-        <thead class="text-slate-500 dark:text-slate-400 border-b border-slate-200/50 dark:border-slate-700/50">
+        <thead
+          class="text-slate-500 dark:text-slate-400 border-b border-slate-200/50 dark:border-slate-700/50"
+        >
           <tr>
             <th class="py-3 text-left font-semibold">Class</th>
             <th class="py-3 text-left font-semibold">Expiry</th>
@@ -295,15 +489,18 @@
             *ngFor="let med of medicalStatus"
             class="border-b border-slate-200/30 dark:border-slate-700/30 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors"
           >
-            <td class="py-4 font-medium">{{ med.type }}</td>
+            <td class="py-4 font-medium">{{ med.classLabel }}</td>
             <td class="py-4">{{ med.expiryDate | date }}</td>
             <td class="py-4 text-right">
               <span
                 class="px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
                 [ngClass]="{
-                  'bg-gradient-to-r from-green-500 to-emerald-500 text-white': med.status === 'Valid',
-                  'bg-gradient-to-r from-yellow-500 to-orange-500 text-white': med.status === 'Expiring Soon',
-                  'bg-gradient-to-r from-red-500 to-rose-500 text-white': med.status === 'Expired'
+                  'bg-gradient-to-r from-green-500 to-emerald-500 text-white':
+                    med.status === 'Valid',
+                  'bg-gradient-to-r from-yellow-500 to-orange-500 text-white':
+                    med.status === 'Expiring Soon',
+                  'bg-gradient-to-r from-red-500 to-rose-500 text-white':
+                    med.status === 'Expired',
                 }"
               >
                 {{ med.status }}
@@ -315,18 +512,34 @@
     </div>
 
     <!-- LICENSES -->
-    <div class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover">
+    <div
+      class="glass rounded-2xl shadow-xl p-6 border border-white/20 card-hover"
+    >
       <div class="flex items-center space-x-3 mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd" />
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg"
+        >
+          <svg
+            class="w-6 h-6 text-white"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z"
+              clip-rule="evenodd"
+            />
           </svg>
         </div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Licenses</h3>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+          Licenses
+        </h3>
       </div>
 
       <table class="w-full text-sm">
-        <thead class="text-slate-500 dark:text-slate-400 border-b border-slate-200/50 dark:border-slate-700/50">
+        <thead
+          class="text-slate-500 dark:text-slate-400 border-b border-slate-200/50 dark:border-slate-700/50"
+        >
           <tr>
             <th class="py-3 text-left font-semibold">License</th>
             <th class="py-3 text-left font-semibold">Expiry</th>
@@ -345,9 +558,12 @@
               <span
                 class="px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
                 [ngClass]="{
-                  'bg-gradient-to-r from-green-500 to-emerald-500 text-white': lic.status === 'Valid',
-                  'bg-gradient-to-r from-yellow-500 to-orange-500 text-white': lic.status === 'Expiring Soon',
-                  'bg-gradient-to-r from-red-500 to-rose-500 text-white': lic.status === 'Expired'
+                  'bg-gradient-to-r from-green-500 to-emerald-500 text-white':
+                    lic.status === 'Valid',
+                  'bg-gradient-to-r from-yellow-500 to-orange-500 text-white':
+                    lic.status === 'Expiring Soon',
+                  'bg-gradient-to-r from-red-500 to-rose-500 text-white':
+                    lic.status === 'Expired',
                 }"
               >
                 {{ lic.status }}
@@ -357,22 +573,31 @@
         </tbody>
       </table>
     </div>
-
   </div>
 
   <!-- RECENT LOGBOOK -->
-  <div class="glass rounded-2xl shadow-xl p-6 border border-white/20 premium-card">
+  <div
+    class="glass rounded-2xl shadow-xl p-6 border border-white/20 premium-card"
+  >
     <div class="flex items-center space-x-3 mb-6">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+      <div
+        class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg"
+      >
         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+          <path
+            d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"
+          />
         </svg>
       </div>
-      <h3 class="text-xl font-bold text-slate-900 dark:text-white">Recent Flights</h3>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+        Recent Flights
+      </h3>
     </div>
 
     <table class="w-full text-sm">
-      <thead class="text-slate-500 dark:text-gray-400 border-b border-slate-200 dark:border-gray-700">
+      <thead
+        class="text-slate-500 dark:text-gray-400 border-b border-slate-200 dark:border-gray-700"
+      >
         <tr>
           <th class="py-2 text-left">Date</th>
           <th class="py-2 text-left">Aircraft</th>
@@ -392,5 +617,4 @@
       </tbody>
     </table>
   </div>
-
 </div>

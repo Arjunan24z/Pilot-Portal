@@ -143,6 +143,7 @@ export class DashboardComponent implements OnInit {
   formatMedicalStatus(medicals: any[]) {
     return medicals.map(m => ({
       ...m,
+      classLabel: m.classType || m.type || 'Unknown Class',
       status: this.calculateStatus(m.expiryDate)
     }));
   }

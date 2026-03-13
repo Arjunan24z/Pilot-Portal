@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit {
   initials = 'U';
   menuOpen = false;
   notificationOpen = false;
+  showAllNotifications = false;
   isDarkMode = false;
   
   notifications = [
@@ -60,11 +61,17 @@ export class HeaderComponent implements OnInit {
     this.notificationOpen = !this.notificationOpen;
     if (this.notificationOpen) {
       this.menuOpen = false;
+      this.showAllNotifications = false;
     }
   }
 
   closeNotifications() {
     this.notificationOpen = false;
+    this.showAllNotifications = false;
+  }
+
+  toggleAllNotifications() {
+    this.showAllNotifications = !this.showAllNotifications;
   }
 
   markAsRead(notificationId: number) {
@@ -92,6 +99,10 @@ export class HeaderComponent implements OnInit {
     return this.notifications.filter(n => !n.read).length;
   }
 
+  get displayedNotifications() {
+    return this.showAllNotifications ? this.notifications : this.notifications.slice(0, 3);
+  }
+
   toggleTheme() {
     this.themeService.toggleTheme();
   }
@@ -116,6 +127,8 @@ export class HeaderComponent implements OnInit {
     const target = event.target as HTMLElement;
     if (!target.closest('app-header')) {
       this.menuOpen = false;
+      this.notificationOpen = false;
+      this.showAllNotifications = false;
     }
   }
 }

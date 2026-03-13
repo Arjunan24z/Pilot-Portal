@@ -1,281 +1,262 @@
-<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-6">
+<div class="medical-shell rounded-2xl p-6 md:p-8 space-y-6">
+  <div class="medical-grid">
+    <section class="intel-card">
+      <p class="eyebrow">Medical Intelligence</p>
+      <h3>{{ classType }} Medical Compliance</h3>
+      <p class="muted">
+        {{
+          classType === "Class 1"
+            ? "Commercial readiness monitoring with high-priority renewal windows."
+            : "Private operations readiness with proactive expiry and limitation tracking."
+        }}
+      </p>
 
-  <!-- HEADER -->
-  <div class="space-y-1">
-    <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
-      {{ classType }} Medical
-    </h3>
+      <div class="stat-row" *ngIf="medical; else noMetrics">
+        <div class="stat-chip">
+          <span>Status</span>
+          <strong
+            [ngClass]="{
+              'text-emerald-400': status === 'Valid',
+              'text-amber-400': status === 'Expiring Soon',
+              'text-rose-400': status === 'Expired',
+            }"
+            >{{ status }}</strong
+          >
+        </div>
 
-    <p class="text-sm text-slate-600 dark:text-slate-400">
-      {{
-        classType === 'Class 1'
-          ? 'Required for CPL / ATPL and commercial flying operations.'
-          : 'Required for SPL / PPL and non-commercial flying.'
-      }}
-    </p>
-  </div>
+        <div class="stat-chip">
+          <span>Days Remaining</span>
+          <strong>{{ daysToExpiry !== null ? daysToExpiry : "N/A" }}</strong>
+        </div>
 
-  <!-- LOADING -->
-  <p *ngIf="loading" class="text-slate-600 dark:text-slate-400 text-sm">
-    Loading medical record…
-  </p>
+        <div class="stat-chip">
+          <span>Readiness Score</span>
+          <strong>{{ medicalReadinessScore }}%</strong>
+        </div>
+      </div>
 
-  <!-- NO MEDICAL STATE -->
-  <div
-    *ngIf="!loading && !medical && !showForm"
-    class="bg-yellow-50 dark:bg-slate-800/40 border border-yellow-200 dark:border-slate-700 rounded-lg p-5 space-y-3"
-  >
-    <p class="text-yellow-700 dark:text-yellow-400 font-medium">
-      ⚠️ No medical certificate on record
-    </p>
+      <ng-template #noMetrics>
+        <div class="stat-chip empty">No record yet</div>
+      </ng-template>
 
-    <p class="text-slate-700 dark:text-slate-400 text-sm">
-      Upload your latest {{ classType }} medical certificate to track validity
-      and flight readiness.
-    </p>
+      <div class="progress-wrap" *ngIf="medical">
+        <div class="progress-label">
+          <span>Certificate Lifecycle</span>
+          <span>{{ expiryProgress }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-value" [style.width.%]="expiryProgress"></div>
+        </div>
+      </div>
 
-    <button
-      (click)="openRenew()"
-      class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-medium text-white"
-    >
-      Upload Medical Certificate
-    </button>
-  </div>
+      <div class="action-hint">
+        <span>Next Action</span>
+        <p>{{ renewalAction }}</p>
+      </div>
 
-  <!-- EXISTING MEDICAL -->
-  <div *ngIf="!loading && medical && !showForm" class="space-y-4">
-
-    <!-- DOCUMENT PREVIEW -->
-    <div *ngIf="medical.documentUrl" class="space-y-2">
-
-      <div class="flex items-center justify-between">
+      <div class="button-row">
+        <button class="primary-btn" (click)="openRenew()">
+          {{ medical ? "Renew / Update" : "Upload Medical" }}
+        </button>
         <button
+          class="ghost-btn"
+          *ngIf="medical?.documentUrl"
           (click)="showPreview = !showPreview"
-          class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium"
         >
-          📄 {{ showPreview ? 'Hide' : 'View' }} Medical Certificate
-          <span class="text-slate-500 dark:text-slate-500 text-xs">
-            ({{ medical.documentName }})
-          </span>
+          {{ showPreview ? "Hide Document" : "Preview Document" }}
         </button>
+      </div>
+    </section>
 
-        <span class="text-xs text-slate-500 dark:text-slate-500">
-          PDF • Verified document
-        </span>
+    <section class="data-card" *ngIf="!loading && medical && !showForm">
+      <h4>Certificate Snapshot</h4>
+
+      <div class="detail-grid">
+        <div>
+          <label>Issue Date</label>
+          <p>{{ medical.issueDate | date }}</p>
+        </div>
+        <div>
+          <label>Expiry Date</label>
+          <p>{{ medical.expiryDate | date }}</p>
+        </div>
+        <div *ngIf="medical.examinerName">
+          <label>Examiner</label>
+          <p>{{ medical.examinerName }}</p>
+        </div>
+        <div *ngIf="medical.examinerNumber">
+          <label>AME Number</label>
+          <p>{{ medical.examinerNumber }}</p>
+        </div>
+        <div *ngIf="medical.examinationDate">
+          <label>Exam Date</label>
+          <p>{{ medical.examinationDate | date }}</p>
+        </div>
+        <div>
+          <label>Reminder Lead</label>
+          <p>{{ medical.reminderDays || 30 }} days</p>
+        </div>
       </div>
 
-      <!-- PDF PANEL -->
+      <div class="notice danger" *ngIf="medical.restrictions">
+        <span>Restrictions</span>
+        <p>{{ medical.restrictions }}</p>
+      </div>
+
+      <div class="notice warning" *ngIf="medical.limitations">
+        <span>Operational Limitations</span>
+        <p>{{ medical.limitations }}</p>
+      </div>
+
+      <div class="notice neutral" *ngIf="medical.remarks">
+        <span>Remarks</span>
+        <p>{{ medical.remarks }}</p>
+      </div>
+
       <div
-        *ngIf="showPreview"
-        class="relative bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden shadow-lg"
+        *ngIf="medical.previousMedicals && medical.previousMedicals.length > 0"
+        class="history-wrap"
       >
-        <button
-          (click)="showPreview = false"
-          class="absolute top-2 right-2 bg-slate-100 dark:bg-slate-900/80 hover:bg-slate-200 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-2 py-1 rounded text-xs z-10"
-        >
-          ✕ Close
-        </button>
-
-        <iframe
-          [src]="safePdfUrl"
-          class="w-full h-[520px] bg-white dark:bg-slate-900"
-        ></iframe>
+        <h5>Medical History</h5>
+        <div class="history-item" *ngFor="let prev of medical.previousMedicals">
+          <div>
+            <strong>{{ prev.classType }}</strong>
+            <p>{{ prev.issueDate | date }} to {{ prev.expiryDate | date }}</p>
+          </div>
+          <span *ngIf="prev.examinerName">{{ prev.examinerName }}</span>
+        </div>
       </div>
+    </section>
+  </div>
+
+  <p *ngIf="loading" class="loading-note text-sm">Loading medical record...</p>
+
+  <div *ngIf="!loading && !medical && !showForm" class="empty-panel">
+    <p>No {{ classType }} record found.</p>
+    <span
+      >Create your first certificate to activate expiry tracking and
+      reminders.</span
+    >
+  </div>
+
+  <section *ngIf="showForm" class="form-card">
+    <div class="form-head">
+      <h4>
+        {{ medical ? "Renew Medical Certificate" : "Create Medical Record" }}
+      </h4>
+      <button
+        type="button"
+        class="ghost-btn"
+        (click)="autoFillExpiryFromIssue()"
+      >
+        Auto-fill 1 year expiry
+      </button>
     </div>
 
-    <!-- DETAILS -->
-    <div class="grid grid-cols-2 gap-y-3 text-sm">
-
-      <div class="text-slate-600 dark:text-slate-400">Issue Date</div>
-      <div class="text-slate-900 dark:text-slate-200">{{ medical.issueDate | date }}</div>
-
-      <div class="text-slate-600 dark:text-slate-400">Expiry Date</div>
-      <div class="text-slate-900 dark:text-slate-200">{{ medical.expiryDate | date }}</div>
-
-      <div class="text-slate-600 dark:text-slate-400">Status</div>
+    <div class="form-grid">
       <div>
-        <span
-          class="px-2 py-1 text-xs rounded font-medium"
-          [ngClass]="{
-            'bg-green-100 dark:bg-green-700/40 text-green-700 dark:text-green-300': status === 'Valid',
-            'bg-yellow-100 dark:bg-yellow-700/40 text-yellow-700 dark:text-yellow-300': status === 'Expiring Soon',
-            'bg-red-100 dark:bg-red-700/40 text-red-700 dark:text-red-300': status === 'Expired'
-          }"
-        >
-          {{ status }}
-        </span>
+        <label>Issue Date</label>
+        <input type="date" [(ngModel)]="form.issueDate" />
       </div>
-
-      <!-- New Fields -->
-      <div *ngIf="medical.examinerName" class="text-slate-600 dark:text-slate-400">Examiner</div>
-      <div *ngIf="medical.examinerName" class="text-slate-900 dark:text-slate-200">
-        {{ medical.examinerName }}
-        <span *ngIf="medical.examinerNumber" class="text-slate-500 dark:text-slate-500 text-xs">
-          (AME #{{ medical.examinerNumber }})
-        </span>
+      <div>
+        <label>Expiry Date</label>
+        <input type="date" [(ngModel)]="form.expiryDate" />
       </div>
-
-      <div *ngIf="medical.examinationDate" class="text-slate-600 dark:text-slate-400">Examination Date</div>
-      <div *ngIf="medical.examinationDate" class="text-slate-900 dark:text-slate-200">
-        {{ medical.examinationDate | date }}
+      <div>
+        <label>AME Name</label>
+        <input
+          type="text"
+          [(ngModel)]="form.examinerName"
+          placeholder="Dr. Jane Smith"
+        />
       </div>
-
-      <div *ngIf="medical.restrictions" class="text-slate-600 dark:text-slate-400">Restrictions</div>
-      <div *ngIf="medical.restrictions" class="text-red-600 dark:text-red-400 font-medium">
-        ⚠️ {{ medical.restrictions }}
+      <div>
+        <label>AME Number</label>
+        <input
+          type="text"
+          [(ngModel)]="form.examinerNumber"
+          placeholder="AME-12345"
+        />
       </div>
-
-      <div *ngIf="medical.limitations" class="text-slate-600 dark:text-slate-400">Limitations</div>
-      <div *ngIf="medical.limitations" class="text-yellow-600 dark:text-yellow-400">
-        {{ medical.limitations }}
+      <div>
+        <label>Examination Date</label>
+        <input type="date" [(ngModel)]="form.examinationDate" />
       </div>
-
-      <div *ngIf="medical.remarks" class="text-slate-600 dark:text-slate-400">Remarks</div>
-      <div *ngIf="medical.remarks" class="text-slate-900 dark:text-slate-200 text-sm">
-        {{ medical.remarks }}
-      </div>
-    </div>
-
-    <!-- Medical History -->
-    <div *ngIf="medical.previousMedicals && medical.previousMedicals.length > 0" class="mt-4 space-y-2">
-      <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Medical History</h4>
-      <div class="space-y-1">
-        <div
-          *ngFor="let prev of medical.previousMedicals"
-          class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded p-2 text-xs"
-        >
-          <span class="font-medium">{{ prev.classType }}</span> - 
-          {{ prev.issueDate | date }} to {{ prev.expiryDate | date }}
-          <span *ngIf="prev.examinerName" class="text-slate-500 dark:text-slate-500">
-            (Dr. {{ prev.examinerName }})
-          </span>
+      <div>
+        <label>Reminder Lead Time</label>
+        <select [(ngModel)]="form.reminderDays">
+          <option *ngFor="let option of reminderOptions" [ngValue]="option">
+            {{ option }} days
+          </option>
+        </select>
+        <div class="chip-row">
+          <button
+            type="button"
+            *ngFor="let option of [45, 30, 14]"
+            (click)="quickSetReminder(option)"
+          >
+            {{ option }}d
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- ACTION -->
-    <button
-      (click)="openRenew()"
-      class="mt-3 bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-medium text-white"
-    >
-      Renew Medical
-    </button>
-  </div>
-
-  <!-- RENEW / UPLOAD FORM -->
-  <div
-    *ngIf="showForm"
-    class="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg p-5 space-y-4"
-  >
-
-    <p class="text-sm text-slate-700 dark:text-slate-400">
-      Upload your new medical certificate and enter all relevant information.
-    </p>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Issue Date</label>
-      <input
-        type="date"
-        [(ngModel)]="form.issueDate"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      />
+    <div class="form-grid single">
+      <div>
+        <label>Restrictions</label>
+        <input
+          type="text"
+          [(ngModel)]="form.restrictions"
+          placeholder="Must wear corrective lenses"
+        />
+      </div>
+      <div>
+        <label>Operational Limitations</label>
+        <input
+          type="text"
+          [(ngModel)]="form.limitations"
+          placeholder="Not valid for night operations"
+        />
+      </div>
+      <div>
+        <label>Remarks</label>
+        <textarea
+          rows="2"
+          [(ngModel)]="form.remarks"
+          placeholder="Additional notes"
+        ></textarea>
+      </div>
+      <div>
+        <label>Medical Certificate (PDF)</label>
+        <input
+          type="file"
+          accept="application/pdf"
+          (change)="onFileSelect($event)"
+        />
+      </div>
     </div>
 
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Expiry Date</label>
-      <input
-        type="date"
-        [(ngModel)]="form.expiryDate"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      />
-    </div>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Aviation Medical Examiner (AME) Name</label>
-      <input
-        type="text"
-        [(ngModel)]="form.examinerName"
-        placeholder="e.g., Dr. Jane Smith"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      />
-    </div>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">AME Certificate Number</label>
-      <input
-        type="text"
-        [(ngModel)]="form.examinerNumber"
-        placeholder="e.g., AME-12345"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      />
-    </div>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Examination Date</label>
-      <input
-        type="date"
-        [(ngModel)]="form.examinationDate"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      />
-    </div>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Restrictions (if any)</label>
-      <input
-        type="text"
-        [(ngModel)]="form.restrictions"
-        placeholder="e.g., Must wear corrective lenses"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      />
-    </div>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Operational Limitations (if any)</label>
-      <input
-        type="text"
-        [(ngModel)]="form.limitations"
-        placeholder="e.g., Not valid for night flying"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      />
-    </div>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Remarks</label>
-      <textarea
-        [(ngModel)]="form.remarks"
-        rows="2"
-        placeholder="Additional notes..."
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-slate-900 dark:text-slate-200"
-      ></textarea>
-    </div>
-
-    <div>
-      <label class="text-sm text-slate-700 dark:text-slate-300">Medical Certificate (PDF)</label>
-      <input
-        type="file"
-        accept="application/pdf"
-        (change)="onFileSelect($event)"
-        class="w-full mt-1 p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-sm text-slate-700 dark:text-slate-300"
-      />
-    </div>
-
-    <div class="flex gap-3 pt-2">
-      <button
-        (click)="save()"
-        class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded text-sm font-medium text-white"
-      >
-        Save
+    <div class="button-row">
+      <button class="primary-btn" (click)="save()" [disabled]="isSaving">
+        {{ isSaving ? "Saving..." : "Save Medical" }}
       </button>
-
       <button
+        class="ghost-btn"
         (click)="showForm = false"
-        class="border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 px-4 py-2 rounded text-sm text-slate-700 dark:text-slate-300"
+        [disabled]="isSaving"
       >
         Cancel
       </button>
     </div>
+  </section>
 
-    <p class="text-green-400 text-sm">{{ message }}</p>
-  </div>
+  <section *ngIf="showPreview && medical?.documentUrl" class="preview-card">
+    <div class="preview-head">
+      <h4>Medical Document Viewer</h4>
+      <button class="ghost-btn" (click)="showPreview = false">Close</button>
+    </div>
+    <iframe [src]="safePdfUrl" class="w-full h-[520px]"></iframe>
+  </section>
 
+  <p *ngIf="message" class="feedback">{{ message }}</p>
 </div>

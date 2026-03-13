@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { LogEntry, LogbookService } from 'src/app/services/logbook/logbook.service';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 Chart.register(...registerables);
@@ -17,6 +17,12 @@ export class LogbookComponent implements OnInit {
   lastFlightDate: string | null = null;
   showForm = false;
   chart!: Chart;
+  flightTypeChart!: Chart;
+  liveMode = true;
+  refreshIntervalSeconds = 20;
+  lastSyncedAt: Date | null = null;
+  isRefreshing = false;
+  private refreshTimer?: ReturnType<typeof setInterval>;
 
   aircraftSummary: {
     aircraft: string;
@@ -54,9 +60,26 @@ export class LogbookComponent implements OnInit {
 
   ngOnInit() {
     this.loadLogbook();
+    this.startLiveSync();
   }
 
-  loadLogbook() {
+  ngOnDestroy() {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
+    if (this.flightTypeChart) {
+      this.flightTypeChart.destroy();
+    }
+  }
+
+  loadLogbook(silent = false) {
+    this.isRefreshing = !silent;
+
     this.logbookService.getAll().subscribe({
       next: (res) => {
         this.logbook = res || [];
@@ -75,10 +98,39 @@ export class LogbookComponent implements OnInit {
           : null;
   
         this.calculateAircraftSummary();
-        this.renderMonthlyChart(); // 🔹 ADD THIS
+        this.renderMonthlyChart();
+        this.renderFlightTypeChart();
+        this.lastSyncedAt = new Date();
+        this.isRefreshing = false;
       },
-      error: () => this.message = 'Error loading logbook!'
+      error: () => {
+        this.message = 'Error loading logbook!';
+        this.isRefreshing = false;
+      }
     });
+  }
+
+  startLiveSync() {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+
+    if (!this.liveMode) {
+      return;
+    }
+
+    this.refreshTimer = setInterval(() => {
+      this.loadLogbook(true);
+    }, this.refreshIntervalSeconds * 1000);
+  }
+
+  toggleLiveMode() {
+    this.liveMode = !this.liveMode;
+    this.startLiveSync();
+  }
+
+  manualRefresh() {
+    this.loadLogbook();
   }
 
   
@@ -86,71 +138,142 @@ export class LogbookComponent implements OnInit {
     if (this.chart) {
       this.chart.destroy();
     }
-  
+
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    const legendColor   = isDarkMode ? '#e2e8f0' : '#1e293b';
+    const axisTickColor = isDarkMode ? '#94a3b8' : '#475569';
+    const axisTitleColor = isDarkMode ? '#cbd5e1' : '#334155';
+    const gridColor     = isDarkMode ? 'rgba(148,163,184,0.1)' : 'rgba(100,116,139,0.12)';
+    const barColor      = isDarkMode ? 'rgba(56,189,248,0.72)'  : 'rgba(3,105,161,0.68)';
+    const barHover      = isDarkMode ? 'rgba(56,189,248,1)'     : 'rgba(3,105,161,1)';
+
     const monthlyMap: { [key: string]: number } = {};
-  
+
     this.logbook.forEach(log => {
       const date = new Date(log.date);
-      const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
-  
+      const key  = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       monthlyMap[key] = (monthlyMap[key] || 0) + Number(log.totalTime || log.hours || 0);
     });
-  
+
     const sortedKeys = Object.keys(monthlyMap).sort();
-  
+
     const labels = sortedKeys.map(k => {
       const [y, m] = k.split('-');
-      return new Date(+y, +m - 1).toLocaleString('default', {
-        month: 'short',
-        year: 'numeric'
-      });
+      return new Date(+y, +m - 1).toLocaleString('default', { month: 'short', year: '2-digit' });
     });
-  
-    const data = sortedKeys.map(k => monthlyMap[k]);
-  
+
+    const data = sortedKeys.map(k => parseFloat(monthlyMap[k].toFixed(1)));
+
     this.chart = new Chart('monthlyHoursChart', {
-      type: 'line',
+      type: 'bar',
       data: {
         labels,
-        datasets: [
-          {
-            label: 'Monthly Flight Hours',
-            data,
-            borderColor: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.2)',
-            tension: 0.35,
-            fill: true,
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }
-        ]
+        datasets: [{
+          label: 'Flight Hours',
+          data,
+          backgroundColor: barColor,
+          hoverBackgroundColor: barHover,
+          borderRadius: 6,
+          borderSkipped: false
+        }]
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false, // 🔹 allows compact height
+        maintainAspectRatio: false,
         plugins: {
-          legend: {
-            labels: {
-              color: '#e5e7eb'
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `  ${ctx.raw} hrs`
             }
           }
         },
         scales: {
           x: {
-            ticks: { color: '#9ca3af' },
-            grid: { display: false }
+            ticks: { color: axisTickColor },
+            grid: { display: false },
+            title: {
+              display: true,
+              text: 'Month',
+              color: axisTitleColor,
+              font: { size: 11 }
+            }
           },
           y: {
-            ticks: { color: '#9ca3af' },
-            grid: { color: '#1f2937' }
+            ticks: {
+              color: axisTickColor,
+              callback: (v) => `${v}h`
+            },
+            grid: { color: gridColor },
+            title: {
+              display: true,
+              text: 'Flight Hours',
+              color: axisTitleColor,
+              font: { size: 11 }
+            },
+            beginAtZero: true
           }
         }
       }
     });
   }
-  
-  
-  
+
+  renderFlightTypeChart() {
+    if (this.flightTypeChart) {
+      this.flightTypeChart.destroy();
+    }
+
+    const isDarkMode  = document.documentElement.classList.contains('dark');
+    const legendColor = isDarkMode ? '#e2e8f0' : '#1e293b';
+    const borderColor = isDarkMode ? '#0f172a' : '#ffffff';
+
+    const counts: { [key: string]: number } = {};
+    this.logbook.forEach(log => {
+      const ft = this.normalizeFlightType(log.flightType as string);
+      counts[ft] = (counts[ft] || 0) + 1;
+    });
+
+    const labels = Object.keys(counts);
+    const data   = labels.map(l => counts[l]);
+    const palette = ['#38bdf8', '#818cf8', '#34d399', '#fb923c', '#f472b6'];
+
+    this.flightTypeChart = new Chart('flightTypeChart', {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: palette.slice(0, labels.length),
+          borderWidth: 2,
+          borderColor,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: legendColor,
+              boxWidth: 12,
+              padding: 10,
+              font: { size: 11 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `  ${ctx.label}: ${ctx.raw} flights`
+            }
+          }
+        }
+      }
+    });
+  }
+
+
   calculateAircraftSummary() {
     const map: any = {};
   
@@ -207,8 +330,11 @@ export class LogbookComponent implements OnInit {
 
   saveEntry() {
     // Sync legacy hours field with totalTime for backward compatibility
+    const normalizedFlightType = this.normalizeFlightType(this.entry.flightType as string);
+
     const body: LogEntry = {
       ...this.entry,
+      flightType: normalizedFlightType,
       hours: this.entry.totalTime
     };
 
@@ -237,6 +363,7 @@ export class LogbookComponent implements OnInit {
 
   edit(log: LogEntry) {
     this.entry = { ...log };
+    this.entry.flightType = this.normalizeFlightType(log.flightType as string).toLowerCase() as any;
     this.editingId = log._id!;
   }
 
@@ -270,5 +397,32 @@ export class LogbookComponent implements OnInit {
       remarks: ''
     };
     this.editingId = null;
+  }
+
+  get averageHoursPerFlight(): number {
+    if (!this.totalFlights) {
+      return 0;
+    }
+
+    return Number((this.totalHours / this.totalFlights).toFixed(1));
+  }
+
+  get topAircraft(): string {
+    if (!this.aircraftSummary.length) {
+      return 'N/A';
+    }
+
+    const sorted = [...this.aircraftSummary].sort((a, b) => b.hours - a.hours);
+    return sorted[0].aircraft;
+  }
+
+  private normalizeFlightType(type?: string): 'Training' | 'Solo' | 'Personal' | 'Commercial' | 'Other' {
+    const normalized = (type || '').toLowerCase();
+
+    if (normalized === 'training') return 'Training';
+    if (normalized === 'solo') return 'Solo';
+    if (normalized === 'commercial') return 'Commercial';
+    if (normalized === 'checkride' || normalized === 'other') return 'Other';
+    return 'Personal';
   }
 }

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { License, LicenseService, Endorsement } from 'src/app/services/license/license.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-license',
@@ -22,6 +23,7 @@ export class LicenseComponent {
 
   selectedFile?: File;
   safePdfUrl?: SafeResourceUrl;
+  isSaving = false;
 
   form: Partial<License> = {};
   endorsementForm: Partial<Endorsement> = {};
@@ -73,7 +75,7 @@ export class LicenseComponent {
 
         if (this.license?.documentUrl) {
           this.safePdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-            this.license.documentUrl
+            this.getDocumentUrl(this.license.documentUrl)
           );
         }
       },
@@ -104,6 +106,8 @@ export class LicenseComponent {
       remarks: this.license?.remarks || ''
     };
 
+    this.message = '';
+
     this.showForm = true;
   }
 
@@ -117,12 +121,16 @@ export class LicenseComponent {
   }
 
   save() {
+    this.isSaving = true;
+    this.message = '';
+
     const formData = new FormData();
   
     formData.append('type', this.licenseType);
     formData.append('licenseNumber', this.form.licenseNumber || '');
     formData.append('issueDate', this.form.issueDate || '');
     formData.append('expiryDate', this.form.expiryDate || '');
+    formData.append('restrictions', this.form.restrictions || '');
     formData.append('remarks', this.form.remarks || '');
   
     if (this.selectedFile) {
@@ -137,9 +145,11 @@ export class LicenseComponent {
       next: () => {
         this.message = 'License saved successfully';
         this.showForm = false;
+        this.isSaving = false;
         this.loadLicense();
       },
       error: (err) => {
+        this.isSaving = false;
         this.message = err.error?.message || 'Error saving license';
       }
     });
@@ -212,6 +222,44 @@ export class LicenseComponent {
         this.message = err.error?.message || 'Error removing endorsement';
       }
     });
+  }
+
+  get daysToExpiry(): number | null {
+    if (!this.license?.expiryDate) return null;
+    const diffMs = new Date(this.license.expiryDate).getTime() - Date.now();
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  }
+
+  get complianceScore(): number {
+    if (!this.license) return 0;
+
+    let score = 40;
+    if (this.license.documentUrl) score += 20;
+    if (this.license.ratings && this.license.ratings.length > 0) score += 20;
+    if (this.license.endorsements && this.license.endorsements.length > 0) score += 20;
+
+    return Math.min(score, 100);
+  }
+
+  get renewalAction(): string {
+    if (this.daysToExpiry === null) return 'Upload license details to activate compliance monitoring.';
+    if (this.daysToExpiry < 0) return 'License expired. Stop operations and renew immediately.';
+    if (this.daysToExpiry <= 30) return 'High priority renewal window. Submit renewal package now.';
+    if (this.daysToExpiry <= 90) return 'Prepare renewal documents and schedule competency checks.';
+    return 'License currently healthy. Maintain endorsements and rating validity.';
+  }
+
+  get endorsementsCount(): number {
+    return this.license?.endorsements?.length || 0;
+  }
+
+  get ratingsCount(): number {
+    return this.license?.ratings?.length || 0;
+  }
+
+  getDocumentUrl(url: string): string {
+    if (url.startsWith('http')) return url;
+    return `${environment.apiUrl.replace('/api', '')}${url}`;
   }
   
 }
