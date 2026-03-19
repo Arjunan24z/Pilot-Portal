@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { LicenseService } from 'src/app/services/license/license.service';
 import { LogbookService } from 'src/app/services/logbook/logbook.service';
 import { MedicalsService } from 'src/app/services/medicals/medicals.service';
@@ -38,6 +39,7 @@ export class DashboardComponent implements OnInit {
   aiGreeting = '';
 
   constructor(
+    private router: Router,
     private userService: UserService,
     private medicalService: MedicalsService,
     private logbookService: LogbookService,
@@ -47,7 +49,19 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboard();
+    // Check user role and redirect admins to admin dashboard
+    this.userService.getProfile().subscribe({
+      next: (profile: any) => {
+        if (profile?.role === 'admin') {
+          this.router.navigate(['/admin']);
+          return;
+        }
+        this.loadDashboard();
+      },
+      error: () => {
+        this.loadDashboard();
+      }
+    });
   }
 
   loadDashboard() {

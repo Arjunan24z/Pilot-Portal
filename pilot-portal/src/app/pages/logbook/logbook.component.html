@@ -127,16 +127,26 @@
   </div>
 
   <!-- INTELLIGENCE REPORT -->
-  <div class="log-intel-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-5">
+  <div
+    class="log-intel-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-5"
+  >
     <div class="flex items-center gap-3 mb-4">
       <div class="intel-icon">🧠</div>
       <div>
-        <p class="text-xs font-semibold uppercase tracking-widest intel-label">Logbook Intelligence</p>
-        <p class="text-sm intel-sub">Auto-detected trends &amp; currency insights</p>
+        <p class="text-xs font-semibold uppercase tracking-widest intel-label">
+          Logbook Intelligence
+        </p>
+        <p class="text-sm intel-sub">
+          Auto-detected trends &amp; currency insights
+        </p>
       </div>
     </div>
 
-    <div *ngIf="logbook.length === 0" class="text-sm text-center py-4" style="color:var(--log-muted)">
+    <div
+      *ngIf="logbook.length === 0"
+      class="text-sm text-center py-4"
+      style="color: var(--log-muted)"
+    >
       Log flights to unlock intelligence insights.
     </div>
 
@@ -152,7 +162,13 @@
           <span class="intel-item-detail">{{ ins.detail }}</span>
         </div>
         <span class="intel-item-badge">
-          {{ ins.type === 'warning' ? '⚠ Action' : ins.type === 'success' ? '✓ Good' : 'ℹ Info' }}
+          {{
+            ins.type === "warning"
+              ? "⚠ Action"
+              : ins.type === "success"
+                ? "✓ Good"
+                : "ℹ Info"
+          }}
         </span>
       </div>
     </div>
@@ -229,7 +245,7 @@
   </div>
 
   <!-- ENTRY FORM -->
-  <div
+  <form
     *ngIf="showForm"
     class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg p-6 space-y-6"
   >
@@ -251,6 +267,7 @@
           >
           <input
             type="date"
+            name="date"
             [(ngModel)]="entry.date"
             required
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -263,6 +280,7 @@
           >
           <input
             type="text"
+            name="aircraft"
             [(ngModel)]="entry.aircraft"
             placeholder="e.g., C172, PA-28"
             required
@@ -275,6 +293,7 @@
             >Flight Type</label
           >
           <select
+            name="flightType"
             [(ngModel)]="entry.flightType"
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
@@ -302,6 +321,7 @@
           >
           <input
             type="text"
+            name="departureAirport"
             [(ngModel)]="entry.departureAirport"
             placeholder="e.g., KJFK"
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -314,6 +334,7 @@
           >
           <input
             type="text"
+            name="arrivalAirport"
             [(ngModel)]="entry.arrivalAirport"
             placeholder="e.g., KLAX"
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -336,6 +357,7 @@
           >
           <input
             type="number"
+            name="totalTime"
             step="0.1"
             [(ngModel)]="entry.totalTime"
             min="0"
@@ -350,6 +372,7 @@
           >
           <input
             type="number"
+            name="pilotInCommand"
             step="0.1"
             [(ngModel)]="entry.pilotInCommand"
             min="0"
@@ -363,6 +386,7 @@
           >
           <input
             type="number"
+            name="secondInCommand"
             step="0.1"
             [(ngModel)]="entry.secondInCommand"
             min="0"
@@ -376,6 +400,7 @@
           >
           <input
             type="number"
+            name="nightTime"
             step="0.1"
             [(ngModel)]="entry.nightTime"
             min="0"
@@ -389,6 +414,7 @@
           >
           <input
             type="number"
+            name="crossCountry"
             step="0.1"
             [(ngModel)]="entry.crossCountry"
             min="0"
@@ -402,6 +428,7 @@
           >
           <input
             type="number"
+            name="soloTime"
             step="0.1"
             [(ngModel)]="entry.soloTime"
             min="0"
@@ -415,6 +442,7 @@
           >
           <input
             type="number"
+            name="dualReceived"
             step="0.1"
             [(ngModel)]="entry.dualReceived"
             min="0"
@@ -428,6 +456,7 @@
           >
           <input
             type="number"
+            name="dualGiven"
             step="0.1"
             [(ngModel)]="entry.dualGiven"
             min="0"
@@ -451,6 +480,7 @@
           >
           <input
             type="number"
+            name="instrumentActual"
             step="0.1"
             [(ngModel)]="entry.instrumentActual"
             min="0"
@@ -464,6 +494,7 @@
           >
           <input
             type="number"
+            name="instrumentSimulated"
             step="0.1"
             [(ngModel)]="entry.instrumentSimulated"
             min="0"
@@ -487,6 +518,7 @@
           >
           <input
             type="number"
+            name="dayLandings"
             [(ngModel)]="entry.dayLandings"
             min="0"
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -499,6 +531,7 @@
           >
           <input
             type="number"
+            name="nightLandings"
             [(ngModel)]="entry.nightLandings"
             min="0"
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -521,6 +554,7 @@
           >
           <input
             type="text"
+            name="instructorName"
             [(ngModel)]="entry.instructorName"
             placeholder="e.g., John Smith, CFI"
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -533,6 +567,7 @@
           >
           <input
             type="text"
+            name="remarks"
             [(ngModel)]="entry.remarks"
             placeholder="Notes, maneuvers practiced, etc."
             class="w-full p-2 rounded bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -558,7 +593,7 @@
     </div>
 
     <p class="form-feedback mt-2">{{ message }}</p>
-  </div>
+  </form>
 
   <!-- LOGBOOK TABLE -->
   <div

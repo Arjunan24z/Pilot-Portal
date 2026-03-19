@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../api/api.service';
 
 export interface License {
@@ -35,7 +36,9 @@ export class LicenseService {
   constructor(private http: HttpClient, private api: ApiService) {}
 
   getAll(): Observable<License[]> {
-    return this.http.get<License[]>(`${this.api.BASE_URL}/license`);
+    return this.http.get<{ data: License[] }>(`${this.api.BASE_URL}/license`).pipe(
+      map(response => response.data || [])
+    );
   }
 
   create(body: FormData) {

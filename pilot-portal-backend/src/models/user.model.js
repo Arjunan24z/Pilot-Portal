@@ -6,9 +6,23 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
   phone: String,
+  
+  // AWS Cognito integration
+  cognitoSub: String, // Cognito user ID
+  
+  // Role-based access control
+  role: {
+    type: String,
+    enum: ['admin', 'pilot'],
+    default: 'pilot'
+  },
 
+  // Tracking
   accessStart: Date,
-  accessEnd: Date
+  accessEnd: Date,
+  lastLogin: Date,
+  
+  createdAt: { type: Date, default: Date.now }
 });
 
 // Hash password

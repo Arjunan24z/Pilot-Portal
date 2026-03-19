@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../api/api.service';
 
 export interface LogEntry {
@@ -43,7 +44,9 @@ export class LogbookService {
   constructor(private http: HttpClient, private api: ApiService) {}
 
   getAll(): Observable<LogEntry[]> {
-    return this.http.get<LogEntry[]>(`${this.api.BASE_URL}/logbook`);
+    return this.http.get<{ data: LogEntry[] }>(`${this.api.BASE_URL}/logbook`).pipe(
+      map(response => response.data || [])
+    );
   }
 
   create(body: LogEntry): Observable<LogEntry> {

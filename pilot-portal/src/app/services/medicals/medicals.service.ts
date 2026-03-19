@@ -3,6 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../api/api.service';
 
 // Define and export here since you don't have a separate model file
@@ -39,7 +40,9 @@ export class MedicalsService {
   constructor(private http: HttpClient, private api: ApiService) {}
 
   getAll(): Observable<Medical[]> {
-    return this.http.get<Medical[]>(`${this.api.BASE_URL}/medicals`);
+    return this.http.get<{ data: Medical[] }>(`${this.api.BASE_URL}/medicals`).pipe(
+      map(response => response.data || [])
+    );
   }
 
   createMedical(body: FormData) {

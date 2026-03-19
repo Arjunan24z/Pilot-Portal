@@ -1,0 +1,289 @@
+<div class="tokens-container">
+  <!-- Header -->
+  <div class="tokens-header">
+    <div class="header-content">
+      <h2 class="tokens-title">
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 7h3m-3 8h3m-9-5h6M7 15h10M5 3a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2H5z"
+          />
+        </svg>
+        Cloud Access Tokens
+      </h2>
+      <p class="tokens-subtitle">
+        Manage delegated access tokens for your applications
+      </p>
+    </div>
+    <button
+      (click)="showGenerateForm = !showGenerateForm"
+      class="btn-primary"
+      [disabled]="loading"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      Generate New Token
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="message" class="message" [ngClass]="'message-' + messageType">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fill-rule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+        clip-rule="evenodd"
+      />
+    </svg>
+    {{ message }}
+  </div>
+
+  <!-- Generate Token Form -->
+  <div *ngIf="showGenerateForm" class="generate-form-card">
+    <h3 class="form-title">Generate New Access Token</h3>
+
+    <!-- App Name -->
+    <div class="form-group">
+      <label class="form-label">Application Name</label>
+      <input
+        [(ngModel)]="generateForm.appName"
+        type="text"
+        class="form-input"
+        placeholder="e.g., Mobile App, Desktop Client"
+        [disabled]="loading"
+      />
+      <p class="form-hint">Give your application a memorable name</p>
+    </div>
+
+    <!-- Scopes -->
+    <div class="form-group">
+      <label class="form-label">Permissions (Scopes)</label>
+      <div class="scopes-grid">
+        <div *ngFor="let scope of availableScopes" class="scope-item">
+          <input
+            type="checkbox"
+            [id]="'scope-' + scope.value"
+            [checked]="isScopeSelected(scope.value)"
+            (change)="toggleScope(scope.value)"
+            [disabled]="loading"
+          />
+          <label [for]="'scope-' + scope.value" class="scope-label">
+            {{ scope.label }}
+          </label>
+        </div>
+      </div>
+      <p class="form-hint">Select permissions needed for your application</p>
+    </div>
+
+    <!-- Expiry -->
+    <div class="form-group">
+      <label class="form-label">Token Expiry</label>
+      <select
+        [(ngModel)]="generateForm.expiresInMinutes"
+        class="form-select"
+        [disabled]="loading"
+      >
+        <option value="60">1 hour</option>
+        <option value="480">8 hours</option>
+        <option value="1440">1 day</option>
+        <option value="10080">7 days</option>
+        <option value="40320">30 days</option>
+      </select>
+      <p class="form-hint">Token will automatically expire after this time</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button
+        (click)="generateToken()"
+        class="btn-success"
+        [disabled]="loading"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        {{ loading ? "Generating..." : "Generate Token" }}
+      </button>
+      <button (click)="resetForm()" class="btn-secondary" [disabled]="loading">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Active Tokens List -->
+  <div class="tokens-section">
+    <h3 class="section-title">
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      Active Tokens ({{ tokens.length }})
+    </h3>
+
+    <div *ngIf="loading && !tokens.length" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading tokens...</p>
+    </div>
+
+    <div *ngIf="!loading && tokens.length === 0" class="empty-state">
+      <svg
+        class="w-12 h-12"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 7h3m-3 8h3m-9-5h6M7 15h10M5 3a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2H5z"
+        />
+      </svg>
+      <p>No tokens created yet</p>
+      <p class="text-sm">Generate your first token to get started</p>
+    </div>
+
+    <div
+      *ngFor="let token of tokens"
+      class="token-card"
+      [ngClass]="getStatusClass(token)"
+    >
+      <div class="token-header">
+        <div class="token-info">
+          <h4 class="token-name">{{ token.appName }}</h4>
+          <span class="token-status" [ngClass]="getStatusClass(token)">
+            {{ getStatusText(token) }}
+          </span>
+        </div>
+        <button
+          *ngIf="!token.isRevoked"
+          (click)="revokeToken(token)"
+          class="btn-revoke"
+          [disabled]="loading"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+          Revoke
+        </button>
+      </div>
+
+      <div class="token-details">
+        <div class="detail-row">
+          <span class="detail-label">Scopes:</span>
+          <span class="detail-value">{{ token.scopes.join(", ") }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Created:</span>
+          <span class="detail-value">{{
+            token.createdAt | date: "short"
+          }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label"
+            >{{ token.isRevoked ? "Revoked" : "Expires" }}:</span
+          >
+          <span class="detail-value">{{
+            (token.isRevoked ? token.revokedAt : token.expiresAt)
+              | date: "short"
+          }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Logs -->
+  <div class="audit-section">
+    <button (click)="loadAuditLogs()" class="btn-audit">
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        />
+      </svg>
+      View Audit Logs
+    </button>
+
+    <div *ngIf="showAuditLogs" class="audit-logs-card">
+      <h3 class="section-title">Token Activity Logs</h3>
+
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading audit logs...</p>
+      </div>
+
+      <div *ngIf="!loading && auditLogs.length === 0" class="empty-state">
+        <p>No audit logs available</p>
+      </div>
+
+      <div *ngFor="let log of auditLogs" class="audit-entry">
+        <div class="audit-event">
+          <span class="event-type" [ngClass]="log.eventType.toLowerCase()">
+            {{ log.eventType }}
+          </span>
+          <span class="event-result" [ngClass]="log.result.toLowerCase()">
+            {{ log.result }}
+          </span>
+        </div>
+        <div class="audit-details">
+          <span class="detail-time">{{ log.timestamp | date: "short" }}</span>
+          <span class="detail-ip">IP: {{ log.ipAddress }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

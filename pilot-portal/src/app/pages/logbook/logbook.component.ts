@@ -89,15 +89,20 @@ export class LogbookComponent implements OnInit {
 
     this.logbookService.getAll().subscribe({
       next: (res) => {
-        this.logbook = res || [];
+        // Ensure logbook is always an array
+        this.logbook = Array.isArray(res) ? res : [];
         const nextSignature = this.buildChartSignature(this.logbook);
         const shouldRenderCharts = nextSignature !== this.lastChartSignature;
   
         this.totalFlights = this.logbook.length;
-        this.totalHours = this.logbook.reduce(
-          (sum, l) => sum + (Number(l.totalTime || l.hours) || 0),
-          0
-        );
+        
+        // Safe reduce with array check
+        this.totalHours = Array.isArray(this.logbook) 
+          ? this.logbook.reduce(
+              (sum, l) => sum + (Number(l.totalTime || l.hours) || 0),
+              0
+            )
+          : 0;
   
         this.lastFlightDate = this.logbook.length
           ? this.logbook
@@ -152,6 +157,10 @@ export class LogbookComponent implements OnInit {
   }
 
   private buildChartSignature(entries: LogEntry[]): string {
+    if (!entries || !Array.isArray(entries) || entries.length === 0) {
+      return '0:';
+    }
+
     const head = entries.slice(0, 20).map((entry) => {
       const id = entry._id || '';
       const date = entry.date || '';

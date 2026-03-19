@@ -1,33 +1,37 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../../services/auth/auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
-  email = '';
-  password = '';
-  loading = false;
+  cognitoLoginUrl: string | null = null;
   error: string | null = null;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService) {}
 
-  login() {
-    this.loading = true;
-    this.error = null;
+  ngOnInit() {
+    // Get the Cognito login URL
+    this.getCognitoLoginUrl();
+  }
 
-    this.auth.login(this.email, this.password).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/dashboard']);
+  getCognitoLoginUrl() {
+    this.auth.getCognitoLoginUrl().subscribe({
+      next: (response: any) => {
+        this.cognitoLoginUrl = response.loginUrl;
       },
       error: (err) => {
-        this.loading = false;
-        this.error = err.error?.message || 'Login failed';
+        console.error('Error getting Cognito login URL:', err);
+        this.error = 'Failed to initialize AWS login';
       }
     });
+  }
+
+  loginWithAWS() {
+    if (this.cognitoLoginUrl) {
+      window.location.href = this.cognitoLoginUrl;
+    }
   }
 }

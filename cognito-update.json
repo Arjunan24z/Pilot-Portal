@@ -1,0 +1,39 @@
+{
+  "UserPoolId": "us-east-1_LzGkKvhAE",
+  "ClientId": "7de7b7jvlt2u85icqkm4e67aun",
+  "ClientName": "PilotPortalApp",
+  "ReadAttributes": [
+    "email",
+    "email_verified",
+    "name",
+    "phone_number",
+    "phone_number_verified"
+  ],
+  "WriteAttributes": [
+    "email",
+    "name",
+    "phone_number"
+  ],
+  "ExplicitAuthFlows": [
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH"
+  ],
+  "SupportedIdentityProviders": [
+    "COGNITO"
+  ],
+  "AllowedOAuthFlowsUserPoolClient": true,
+  "AllowedOAuthFlows": [
+    "code"
+  ],
+  "AllowedOAuthScopes": [
+    "openid",
+    "email",
+    "profile"
+  ],
+  "CallbackURLs": [
+    "http://localhost:4200/auth/callback"
+  ],
+  "LogoutURLs": [
+    "http://localhost:4200/auth/login"
+  ]
+}

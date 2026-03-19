@@ -53,6 +53,12 @@ exports.updateProfile = async (req, res) => {
   try {
     const { name, phone } = req.body;
 
+    // SECURITY: Ensure user can only update their own profile
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.userId,
       { name, phone },

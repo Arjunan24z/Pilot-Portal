@@ -1,6 +1,7 @@
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { LoginComponent } from './pages/auth/login/login.component';
+import { CallbackComponent } from './pages/auth/callback/callback.component';
 import { AuthInterceptor } from './interceptors/auth/auth.interceptor';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -16,6 +17,8 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { RegisterComponent } from './pages/auth/register/register.component';
 import { ChatbotComponent } from './pages/chatbot/chatbot.component';
 import { ToastComponent } from './components/toast/toast.component';
+import { TokensComponent } from './pages/profile/tokens/tokens.component';
+import { AdminComponent } from './pages/admin/admin.component';
 
 @NgModule({
   declarations: [
@@ -24,12 +27,15 @@ import { ToastComponent } from './components/toast/toast.component';
     SidebarComponent,
     DashboardComponent,
     ProfileComponent,
+    TokensComponent,
     MedicalsComponent,
     LogbookComponent,
     LicenseComponent,
     LoginComponent,
+    CallbackComponent,
     RegisterComponent,
-    ChatbotComponent
+    ChatbotComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,

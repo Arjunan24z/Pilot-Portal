@@ -34,8 +34,16 @@ exports.createMedical = async (req, res) => {
 
 exports.getMedicals = async (req, res) => {
   try {
-    const medicals = await Medical.find({ userId: req.user.userId });
-    res.json(medicals);
+    // Admins can see all medicals, pilots only see their own
+    const query = req.user.role === 'admin' ? {} : { userId: req.user.userId };
+    const medicals = await Medical.find(query).populate('userId', 'name email role');
+    
+    res.json({
+      message: "Medical records retrieved successfully",
+      count: medicals.length,
+      viewMode: req.user.role === 'admin' ? 'all records (admin)' : 'own records (pilot)',
+      data: medicals
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -43,6 +51,17 @@ exports.getMedicals = async (req, res) => {
 
 exports.updateMedical = async (req, res) => {
   try {
+    // SECURITY: Verify ownership before updating
+    const medical = await Medical.findById(req.params.id);
+    if (!medical) {
+      return res.status(404).json({ message: "Medical record not found" });
+    }
+
+    // Check if medical record belongs to authenticated user
+    if (medical.userId.toString() !== req.user.userId.toString()) {
+      return res.status(403).json({ message: "You don't have permission to update this medical record" });
+    }
+
     const update = {
       issueDate: req.body.issueDate,
       expiryDate: req.body.expiryDate,
@@ -54,13 +73,13 @@ exports.updateMedical = async (req, res) => {
       update.documentUrl = `/uploads/medicals/${req.file.filename}`;
     }
 
-    const medical = await Medical.findByIdAndUpdate(
+    const updatedMedical = await Medical.findByIdAndUpdate(
       req.params.id,
       update,
       { new: true }
     );
 
-    res.json(medical);
+    res.json(updatedMedical);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -69,6 +88,17 @@ exports.updateMedical = async (req, res) => {
 
 exports.deleteMedical = async (req, res) => {
   try {
+    // SECURITY: Verify ownership before deleting
+    const medical = await Medical.findById(req.params.id);
+    if (!medical) {
+      return res.status(404).json({ message: "Medical record not found" });
+    }
+
+    // Check if medical record belongs to authenticated user
+    if (medical.userId.toString() !== req.user.userId.toString()) {
+      return res.status(403).json({ message: "You don't have permission to delete this medical record" });
+    }
+
     await Medical.findByIdAndDelete(req.params.id);
     res.json({ message: "Medical deleted" });
   } catch (error) {

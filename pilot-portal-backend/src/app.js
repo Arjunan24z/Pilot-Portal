@@ -31,6 +31,7 @@ app.use("/api/logbook", require("./routes/logbook.routes"));
 app.use("/api/license", require("./routes/license.routes"));
 app.use("/api/chat", require("./routes/chat.routes"));
 app.use("/api/currency", require("./routes/currency.routes"));
+app.use("/api/admin", require("./routes/admin.routes")); // Admin routes (role-protected)
 app.use("/uploads", express.static("uploads"));
 
 
